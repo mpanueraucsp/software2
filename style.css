@@ -176,7 +176,7 @@ input:focus {
 }
 
 .nav-label {
-  font-size: px;
+  font-size: 15px;
   font-weight: 400;
   margin-bottom: 2px;
 }
@@ -201,6 +201,61 @@ input:focus {
   margin-left: 287px;
   padding: 32px;
   overflow-y: auto;
+}
+
+select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--primary-text);
+  background: #fff;
+  border: 1px solid #dadada;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+}
+
+select:focus {
+  border-color: #b6b6b6;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
+
+input[type="date"] {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--primary-text);
+  background: #fff;
+  border: 2px solid var(--primary-text);
+  border-radius: 8px;
+  outline: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0;
+}
+
+input[type="number"] {
+  padding: 14px 16px;
+  font-size: 15px;
+  color: var(--primary-text);
+  background: #fff;
+  border: 1px solid #dadada;
+  border-radius: 12px;
+  outline: none;
+  transition: border .2s, box-shadow .2s;
+}
+
+input[type="number"]:focus {
+  border-color: #b6b6b6;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
+
+/* Utilidades generales */
+.text-right {
+  text-align: right;
 }
 
 @media (max-width:420px) {

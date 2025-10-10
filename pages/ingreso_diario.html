@@ -11,7 +11,225 @@
   <script>loadSidebar('ingreso-diario');</script>
   
   <style>
-   
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--primary-text);
+      margin-bottom: 24px;
+    }
+    
+    .date-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .date-control {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .date-control label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--primary-text);
+    }
+    
+    .date-input-wrapper {
+      position: relative;
+      width: 340px;
+    }
+    
+    .date-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 18px;
+    }
+    
+    .date-hint {
+      font-size: 12px;
+      color: var(--secondary-text);
+      margin-top: 4px;
+    }
+    
+    .btn-edit {
+      padding: 12px 28px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    
+    .btn-edit:hover {
+      background: var(--primary-hover);
+    }
+    
+    .btn-update {
+      padding: 12px 28px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    
+    .btn-update:hover {
+      background: var(--primary-hover);
+    }
+    
+    .sections-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    .section-card {
+      background: var(--card);
+      border: 2px solid var(--primary-text);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary-text);
+    }
+    
+    .concept-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .concept-select-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+    }
+    
+    .select-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 12px;
+    }
+    
+    .amount-input {
+      width: 85px;
+      padding: 12px 12px;
+      font-size: 15px;
+      text-align: right;
+      color: var(--primary-text);
+      background: #fff;
+      border: 1px solid #dadada;
+      border-radius: 8px;
+      outline: none;
+      flex-shrink: 0;
+    }
+    
+    .amount-input:focus {
+      border-color: #b6b6b6;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+    }
+    
+    .divider {
+      border: none;
+      border-top: 2px solid var(--primary-text);
+      margin: 24px 0;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .total-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary-text);
+    }
+    
+    .total-value {
+      font-size: 16px;
+      padding: 8px 16px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      min-width: 80px;
+      text-align: right;
+      color: var(--primary-text);
+    }
+    
+    .summary-box {
+      border: 2px solid var(--primary-text);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: auto;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .summary-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .summary-label {
+      font-size: 15px;
+      color: var(--primary-text);
+    }
+    
+    .summary-value {
+      font-size: 15px;
+      padding: 4px 12px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      min-width: 70px;
+      text-align: right;
+      color: var(--primary-text);
+    }
+    
+    .item-list {
+      flex: 1;
+      margin-bottom: 16px;
+    }
+    
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      color: var(--primary-text);
+    }
+    
+    .item-name {
+      font-size: 15px;
+    }
+    
+    .item-amount {
+      font-size: 15px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -19,7 +237,268 @@
     <!-- Sidebar se carga aquí -->
     <div id="sidebar-container"></div>
 
-    
+    <main class="main-content">
+      <h1 class="page-title">Ingreso Diario</h1>
+
+      <div class="date-section">
+        <div class="date-control">
+          <label>Fecha</label>
+          <div class="date-input-wrapper">
+            <input type="date" id="fecha" />
+            <span class="date-icon">✕</span>
+          </div>
+          <div class="date-hint">DD/MM/YYYY</div>
+        </div>
+        <button class="btn-edit" onclick="buscarPorFecha()">Editar</button>
+        <button class="btn-update" onclick="actualizarDatos()">Actualizar</button>
+      </div>
+
+      <div class="sections-container">
+        <!-- Sección Ingresos -->
+        <div class="section-card">
+          <h2 class="section-title">Ingresos</h2>
+          
+          <div class="item-list" id="ingresos-list"></div>
+
+          <div class="concept-row">
+            <div class="concept-select-wrapper">
+              <select id="ingreso-concepto">
+                <option value="" disabled selected>Concepto</option>
+                <option value="ocio">Ocio</option>
+                <option value="comida">Comida</option>
+                <option value="transporte">Transporte</option>
+                <option value="ropa">Ropa</option>
+                <option value="nuevo">Nuevo</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <input type="number" class="amount-input" id="ingreso-monto" placeholder="0.00" step="0.01" min="0" />
+          </div>
+
+          <hr class="divider" />
+
+          <div class="total-row">
+            <span class="total-label">TOTAL</span>
+            <span class="total-value" id="total-ingresos">0.00</span>
+          </div>
+        </div>
+
+        <!-- Sección Gastos -->
+        <div class="section-card">
+          <h2 class="section-title">Gastos</h2>
+          
+          <div class="item-list" id="gastos-list"></div>
+
+          <div class="concept-row">
+            <div class="concept-select-wrapper">
+
+              <!-- Aquí traer conceptos de la BD -->
+              <select id="gasto-concepto">
+                <option value="" disabled selected>Concepto</option>
+                <option value="ocio">Ocio</option>
+                <option value="comida">Comida</option>
+                <option value="transporte">Transporte</option>
+                <option value="ropa">Ropa</option>
+                <option value="nuevo">Nuevo</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <input type="number" class="amount-input" id="gasto-monto" placeholder="0.00" step="0.01" min="0" />
+          </div>
+
+          <hr class="divider" />
+
+          <div class="total-row">
+            <span class="total-label">TOTAL</span>
+            <span class="total-value" id="total-gastos">0.00</span>
+          </div>
+
+          <div class="summary-box">
+            <div class="summary-row">
+              <span class="summary-label">Gasto de hoy</span>
+              <span class="summary-value" id="gasto-hoy">0.00</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Total General</span>
+              <span class="summary-value" id="total-general">0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </body>
+
+<script>
+  // Datos temporales (en producción vendrán de la BD)
+  let ingresos = [];
+  let gastos = [];
+
+  // Inicializar fecha actual
+  function inicializarFecha() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha').value = today;
+  }
+
+  // Agregar ingreso cuando se ingresa un monto
+  function setupIngresoListener() {
+    document.getElementById('ingreso-monto').addEventListener('change', function() {
+      const concepto = document.getElementById('ingreso-concepto').value;
+      const monto = parseFloat(this.value);
+
+      if (concepto && monto > 0) {
+        const conceptoTexto = document.getElementById('ingreso-concepto').selectedOptions[0].text;
+        
+        if (conceptoTexto !== 'Nuevo') {
+          ingresos.push({ concepto: conceptoTexto, monto: monto });
+          
+          // Limpiar campos
+          document.getElementById('ingreso-concepto').value = '';
+          this.value = '';
+          
+          renderIngresos();
+          calcularTotales();
+        } else {
+          // Aquí iría la lógica para agregar un concepto nuevo
+          alert('Funcionalidad de agregar concepto nuevo');
+          this.value = '';
+        }
+      }
+    });
+  }
+
+  // Agregar gasto cuando se ingresa un monto
+  function setupGastoListener() {
+    document.getElementById('gasto-monto').addEventListener('change', function() {
+      const concepto = document.getElementById('gasto-concepto').value;
+      const monto = parseFloat(this.value);
+
+      if (concepto && monto > 0) {
+        const conceptoTexto = document.getElementById('gasto-concepto').selectedOptions[0].text;
+        
+        if (conceptoTexto !== 'Nuevo') {
+          gastos.push({ concepto: conceptoTexto, monto: monto });
+          
+          // Limpiar campos
+          document.getElementById('gasto-concepto').value = '';
+          this.value = '';
+          
+          renderGastos();
+          calcularTotales();
+        } else {
+          // Aquí iría la lógica para agregar un concepto nuevo
+          alert('Funcionalidad de agregar concepto nuevo');
+          this.value = '';
+        }
+      }
+    });
+  }
+
+  // Renderizar lista de ingresos
+  function renderIngresos() {
+    const list = document.getElementById('ingresos-list');
+    list.innerHTML = ingresos.map(item => `
+      <div class="item">
+        <span class="item-name">${item.concepto}</span>
+        <span class="item-amount">${item.monto.toFixed(2)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Renderizar lista de gastos
+  function renderGastos() {
+    const list = document.getElementById('gastos-list');
+    list.innerHTML = gastos.map(item => `
+      <div class="item">
+        <span class="item-name">${item.concepto}</span>
+        <span class="item-amount">${item.monto.toFixed(2)}</span>
+      </div>
+    `).join('');
+  }
+
+  // Calcular todos los totales
+  function calcularTotales() {
+    const totalIngresos = ingresos.reduce((sum, item) => sum + item.monto, 0);
+    const totalGastos = gastos.reduce((sum, item) => sum + item.monto, 0);
+    const totalGeneral = totalIngresos - totalGastos;
+
+    document.getElementById('total-ingresos').textContent = totalIngresos.toFixed(2);
+    document.getElementById('total-gastos').textContent = totalGastos.toFixed(2);
+    document.getElementById('gasto-hoy').textContent = totalGastos.toFixed(2);
+    document.getElementById('total-general').textContent = totalGeneral.toFixed(2);
+  }
+
+  // Buscar datos por fecha
+  function buscarPorFecha() {
+    const fecha = document.getElementById('fecha').value;
+    
+    // Aquí irá la llamada a tu API PHP
+    // fetch(`../api/buscar-por-fecha.php?fecha=${fecha}`)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     ingresos = data.ingresos;
+    //     gastos = data.gastos;
+    //     renderIngresos();
+    //     renderGastos();
+    //     calcularTotales();
+    //   });
+    
+    alert('Buscar datos para fecha: ' + fecha);
+    console.log('Fecha seleccionada:', fecha);
+  }
+
+  // Guardar/Actualizar datos
+  function actualizarDatos() {
+    const fecha = document.getElementById('fecha').value;
+    const datos = {
+      fecha: fecha,
+      ingresos: ingresos,
+      gastos: gastos
+    };
+    
+    // Aquí irá la llamada a tu API PHP
+    // fetch('../api/guardar-datos.php', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(datos)
+    // })
+    //   .then(response => response.json())
+    //   .then(result => {
+    //     alert('Datos guardados correctamente');
+    //   });
+    
+    alert('Guardar datos en la base de datos');
+    console.log('Datos a guardar:', datos);
+  }
+
+  // Cargar conceptos desde la base de datos
+  function cargarConceptos() {
+    // Aquí irá la llamada a tu API PHP para obtener los conceptos
+    // fetch('../api/obtener-conceptos.php')
+    //   .then(response => response.json())
+    //   .then(conceptos => {
+    //     const selectIngresos = document.getElementById('ingreso-concepto');
+    //     const selectGastos = document.getElementById('gasto-concepto');
+    //     
+    //     conceptos.forEach(concepto => {
+    //       const option = `<option value="${concepto.id}">${concepto.nombre}</option>`;
+    //       selectIngresos.innerHTML += option;
+    //       selectGastos.innerHTML += option;
+    //     });
+    //   });
+    
+    console.log('Cargar conceptos desde BD');
+  }
+
+  // Inicializar la página
+  function init() {
+    inicializarFecha();
+    setupIngresoListener();
+    setupGastoListener();
+    cargarConceptos();
+  }
+
+  // Ejecutar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', init);
+</script>
 </html>
