@@ -13,7 +13,20 @@
         if (file_exists($file)){
             include_once($file);
             $class = new $controlador();
-            $result = $class->$funcion($_REQUEST);
+            if ($controlador=="gusuario"){
+                if ($funcion=="validarParametros"){
+                    $result = $class->$funcion($_REQUEST["usuario"], $_REQUEST["contrasena"]);
+                }
+            }
+            if ($controlador=="gconcepto"){
+                if ($funcion=="validarParametros"){
+                    $result = $class->$funcion($_REQUEST["nombre"], $_REQUEST["tipo"], $_REQUEST["periodo"], $_REQUEST["dia"], $_REQUEST["usuarioID"], "");
+                }
+                if ($funcion=="traerConceptoPorPeriodicidad"){
+                    $result = $class->$funcion($_REQUEST["usuarioID"], $_REQUEST["token"], $_REQUEST["fecha"]);
+                }
+            }
+            
             if (is_array($result)){
                 //echo "entro aqui";
                 echo json_encode($result);
