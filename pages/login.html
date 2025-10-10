@@ -5,6 +5,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../style.css">
+  <script src="../js/endpoint.js"></script>
+  
+  <script src="../interfaces/InterfazPrincipal.js"></script>
+  <script src="../interfaces/InterfazLogin.js"></script>
   <style>
     body {
       min-height: 100svh;
@@ -43,7 +47,7 @@
   <main class="wrap">
     <h2 class="title">SISTEMA DE PLANIFICACION DE ECONOMIA FAMILIAR</h2>
 
-    <form class="card" action="#" method="post" autocomplete="off">
+     <form id="formLogin" class="card" action="#" method="post" autocomplete="off">
       <div class="control">
         <label for="user">Usuario</label>
         <input id="user" name="usuario" type="text" placeholder="Value" required />
@@ -59,5 +63,9 @@
       </div>
     </form>
   </main>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => new InterfazLogin());
+  </script>
 </body>
 </html>
+    

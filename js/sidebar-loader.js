@@ -32,5 +32,7 @@ function loadSidebar(currentPage) {
           }
         }
       });
+      console.debug("interfazprincipal");
+      window.uiPrincipal = new InterfazPrincipal();
     });
 }

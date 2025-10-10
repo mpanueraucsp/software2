@@ -196,7 +196,7 @@ input:focus {
   border-top: 1px solid #f0f0f0;
 }
 
-.main-content {
+.main-contentaa {
   flex: 1;
   margin-left: 287px;
   padding: 32px;
@@ -263,3 +263,569 @@ input[type="number"]:focus {
     padding: 22px;
   }
 }
+
+/* Ajuste general del layout */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #e0e0e0; /* opcional, solo para contraste */
+}
+
+/* Sidebar ocupa un ancho fijo */
+#sidebar-container {
+  width: 240px; /* ajusta según tu diseño */
+  flex-shrink: 0;
+}
+
+/* Contenido principal */
+.main-content {
+  flex: 1;
+  padding: 24px 40px;  /* antes probablemente tenías mucho padding lateral */
+  margin: 0;
+  background: #f7f7f7;
+}
+aside.sidebar {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+/* Si el contenido principal tiene un max-width forzado, quítalo */
+.main-content > * {
+  max-width: 100%;
+}
+
+/* Ajuste del título */
+.page-title {
+  margin-top: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar ocupa un ancho fijo sin margen */
+#sidebar-container,
+aside.sidebar {
+  width: 240px;       /* o el ancho exacto de tu sidebar */
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border-right: 1px solid #ccc; /* opcional, para separación visual */
+}
+
+/* Contenido principal: SIN margen entre sidebar y main */
+.main-content {
+  flex: 1;
+  background: #f7f7f7;
+  margin: 0;
+  padding: 24px 20px;   /* controla solo el margen interno del texto */
+  box-sizing: border-box;
+}
+
+/* Quita posibles gaps automáticos de body */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  background: #f7f7f7;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+
+
+/* registrar inicio */
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--primary-text);
+  margin-bottom: 24px;
+}
+
+.date-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.date-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-control label {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--primary-text);
+}
+
+.date-input-wrapper {
+  position: relative;
+  width: 340px;
+}
+
+.date-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 18px;
+}
+
+.date-hint {
+  font-size: 12px;
+  color: var(--secondary-text);
+  margin-top: 4px;
+}
+
+.btn-edit {
+  padding: 12px 28px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-edit:hover {
+  background: var(--primary-hover);
+}
+
+.btn-update {
+  padding: 12px 28px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-update:hover {
+  background: var(--primary-hover);
+}
+
+.sections-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.section-card {
+  background: var(--card);
+  border: 2px solid var(--primary-text);
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--primary-text);
+}
+
+.concept-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.concept-select-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.amount-input {
+  width: 85px;
+  padding: 12px 12px;
+  font-size: 15px;
+  text-align: right;
+  color: var(--primary-text);
+  background: #fff;
+  border: 1px solid #dadada;
+  border-radius: 8px;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.amount-input:focus {
+  border-color: #b6b6b6;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid var(--primary-text);
+  margin: 24px 0;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.total-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.total-value {
+  font-size: 16px;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  min-width: 80px;
+  text-align: right;
+  color: var(--primary-text);
+}
+
+.summary-box {
+  border: 2px solid var(--primary-text);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.summary-label {
+  font-size: 15px;
+  color: var(--primary-text);
+}
+
+.summary-value {
+  font-size: 15px;
+  padding: 4px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  min-width: 70px;
+  text-align: right;
+  color: var(--primary-text);
+}
+
+.item-list {
+  flex: 1;
+  margin-bottom: 16px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  color: var(--primary-text);
+}
+
+.item-name {
+  font-size: 15px;
+}
+
+.item-amount {
+  font-size: 15px;
+  font-weight: 500;
+
+}
+
+
+.layout {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 0 !important;
+}
+
+.layout > * {
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar sin margen */
+#sidebar-container, aside.sidebar {
+  width: 240px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border-right: 1px solid #ccc; /* si quieres separación visual */
+}
+
+/* Main pegado al sidebar */
+.main-content {
+  flex: 1;
+  margin: 0;
+  padding: 24px; /* puedes bajar a 16 si lo quieres más pegado */
+  background: #f7f7f7;
+  box-sizing: border-box;
+}
+
+/* Elimina fondo intermedio */
+body, html {
+  margin: 0;
+  padding: 0;
+  background: #f7f7f7;
+}
+
+/* Verifica si sidebar inyectado tiene display:block con background diferente */
+aside.sidebar {
+  background: #fff;
+}
+
+/*.page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--primary-text);
+      margin-bottom: 24px;
+    }
+    
+    .date-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .date-control {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .date-control label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--primary-text);
+    }
+    
+    .date-input-wrapper {
+      position: relative;
+      width: 340px;
+    }
+    
+    .date-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 18px;
+    }
+    
+    .date-hint {
+      font-size: 12px;
+      color: var(--secondary-text);
+      margin-top: 4px;
+    }
+    
+    .btn-edit {
+      padding: 12px 28px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    
+    .btn-edit:hover {
+      background: var(--primary-hover);
+    }
+    
+    .btn-update {
+      padding: 12px 28px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    
+    .btn-update:hover {
+      background: var(--primary-hover);
+    }
+    
+    .sections-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    .section-card {
+      background: var(--card);
+      border: 2px solid var(--primary-text);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary-text);
+    }
+    
+    .concept-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .concept-select-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+    }
+    
+    .select-arrow {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 12px;
+    }
+    
+    .amount-input {
+      width: 85px;
+      padding: 12px 12px;
+      font-size: 15px;
+      text-align: right;
+      color: var(--primary-text);
+      background: #fff;
+      border: 1px solid #dadada;
+      border-radius: 8px;
+      outline: none;
+      flex-shrink: 0;
+    }
+    
+    .amount-input:focus {
+      border-color: #b6b6b6;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+    }
+    
+    .divider {
+      border: none;
+      border-top: 2px solid var(--primary-text);
+      margin: 24px 0;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .total-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary-text);
+    }
+    
+    .total-value {
+      font-size: 16px;
+      padding: 8px 16px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      min-width: 80px;
+      text-align: right;
+      color: var(--primary-text);
+    }
+    
+    .summary-box {
+      border: 2px solid var(--primary-text);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: auto;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .summary-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .summary-label {
+      font-size: 15px;
+      color: var(--primary-text);
+    }
+    
+    .summary-value {
+      font-size: 15px;
+      padding: 4px 12px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      min-width: 70px;
+      text-align: right;
+      color: var(--primary-text);
+    }
+    
+    .item-list {
+      flex: 1;
+      margin-bottom: 16px;
+    }
+    
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      color: var(--primary-text);
+    }
+    
+    .item-name {
+      font-size: 15px;
+    }
+    
+    .item-amount {
+      font-size: 15px;
+      font-weight: 500;
+    }
+    */

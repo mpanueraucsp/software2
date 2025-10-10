@@ -1,7 +1,7 @@
 <?php
     require_once 'database.php';
     /**
-         * G-004 Controlador GConcepto se encarga de la gestion de conceptos
+         * G-003 Controlador GConcepto se encarga de la gestion de conceptos
     **/
     class GConcepto {
         public $nombre;
@@ -65,9 +65,6 @@
             } else {
                 return array("valido"=>false);
             }
-
-
-            return array("cuentaExiste"=>true, "tipoUsuario"=>1, "usuarioID"=>1);
         }
         /**
          * se encarga de traer los conceptos de acuerdo a la periodicidad de la fecha
@@ -78,6 +75,7 @@
          * @return listado, de los conceptos de acuerdo a la periodicidad
          */
         function traerConceptoPorPeriodicidad($usuarioID, $token, $fecha){
+            if ($fecha=="") $fecha = date("d/m/Y");
             $this->usuarioID = $usuarioID;
             try {
             // 1. Obtener instancia única de la conexión

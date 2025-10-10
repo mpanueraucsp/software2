@@ -8,6 +8,11 @@
   <link rel="stylesheet" href="../style.css" />
 
   <script src="../js/sidebar-loader.js"></script>
+  <script src="../js/endpoint.js"></script>
+  <script src="../interfaces/InterfazPrincipal.js"></script>
+  <script src="../interfaces/InterfazIngreso.js"></script>
+  <script src="../interfaces/InterfazConfiguracion.js"></script>
+
   <script>loadSidebar('inicio');</script>
   
   <style>
@@ -16,10 +21,10 @@
 </head>
 <body>
   <div class="layout">
-    <!-- Sidebar se carga aquí -->
     <div id="sidebar-container"></div>
 
-    
+    <!-- Contenedor donde se inyectan vistas -->
+    <main id="app-main" class="main-content"></main>
   </div>
 </body>
 </html>

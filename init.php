@@ -26,6 +26,16 @@
                     $result = $class->$funcion($_REQUEST["usuarioID"], $_REQUEST["token"], $_REQUEST["fecha"]);
                 }
             }
+            if ($controlador=="gcuenta"){
+                if ($funcion=="enviarDatos"){
+                    $result = $class->$funcion($_REQUEST["datos"]);
+                }
+            }
+            if ($controlador=="gbalance"){
+                if ($funcion=="traerBalance"){
+                    $result = $class->$funcion($_REQUEST["usuarioID"], "");
+                }
+            }
             
             if (is_array($result)){
                 //echo "entro aqui";
