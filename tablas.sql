@@ -244,3 +244,5 @@ BEGIN
     );
 END;
 $$;
+
+SELECT traerBalance(10, 'token123', DATE '2025-10-10');
