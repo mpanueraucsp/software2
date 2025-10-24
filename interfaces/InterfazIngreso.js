@@ -38,13 +38,16 @@ class InterfazIngreso {
   }
   mostrarConceptos(data){
     for (const item of data) {
-      if (item.tipoconcepto=="1"){
-        //console.debug(scope.ingresos);
+      console.debug(item.tipoconcepto);
+      if (item.tipoconconcepto=="1"){
+        console.debug("ingresos");
         this.ingresos.push(item);
       }else{
         this.gastos.push(item);
       }
     }
+    console.debug(this.ingresos);
+    console.debug(this.gastos);
     this.renderIngresos();
     this.renderGastos();
     this.calcularTotales();
