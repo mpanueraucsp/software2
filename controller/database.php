@@ -7,11 +7,11 @@ class Database {
     private $connection;
 
     // Configuración de conexión
-    private string $host = 'localhost';
+    private string $host = 'sqa.iuvade.com';
     private string $port = '5432';
     private string $dbname = 'homeplan';
-    private string $user = 'postgres';
-    private string $password = '123456';
+    private string $user = 'homeplan';
+    private string $password = 'ucsp';
 
     /**
      * Constructor privado (patrón Singleton)

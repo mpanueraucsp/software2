@@ -11,7 +11,62 @@ class InterfazConfiguracion {
     this.token = token;
     this.fecha = "";
     console.debug(usuarioID, token);
-    
+    this.traerConceptos(usuarioID);
+  }
+  traerConceptos(usuarioID){
+    console.debug("traerconceptos", this.usuarioID, this.token);
+    //var url = endpoint+`api/gconcepto/traerConceptos/`;
+    var url = endpoint+`api/gconcepto/traerConceptos/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}`;
+    var scope = this;
+    try {
+      fetch(url)
+      .then(resp => {
+        return resp.json(); 
+      })
+      .then(data => {
+        console.debug(data);
+        scope.llenarComboConcepto(data);
+      })
+      .catch(err => console.error("Error:", err));
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+  seleccionarConcepto(){
+    const select = document.getElementById("concepto-select");
+    const conceptoid = select.value; 
+    var url = endpoint+`api/gconcepto/traerDatos/?conceptoID=${encodeURIComponent(conceptoID)}`;
+    var scope = this;
+    try {
+      fetch(url)
+      .then(resp => {
+        return resp.json(); 
+      })
+      .then(data => {
+        console.debug(data);
+        scope.llenarDatosConcepto(data);
+      })
+      .catch(err => console.error("Error:", err));
+    } catch (error) {
+      console.error('Error:', error);
+      alert('No se pudo conectar con el servidor.');
+    }
+  }
+  llenarDatosConcepto(data){
+    console.debug(data);
+  }
+  llenarComboConcepto(data){
+    const select = document.getElementById("concepto-select");
+    select.innerHTML = '<option value="">Seleccione...</option>'; // limpiar primero
+
+    data.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.conceptoid; // el id
+      option.textContent = item.nombre; // el nombre que se muestra
+      select.appendChild(option);
+    });
   }
   // Inicializar la página
   init() {
@@ -75,6 +130,13 @@ class InterfazConfiguracion {
     if (btn) {
       // Usa función flecha para mantener el contexto del "this"
       btn.addEventListener('click', (e) => this.clickGuardar(e));
+    } else {
+      console.warn(" No se encontró el botón .btn-update en el DOM");
+    }
+    var btn1 = document.querySelector('.btn-modificar');
+    if (btn1) {
+      // Usa función flecha para mantener el contexto del "this"
+      btn1.addEventListener('click', (e) => this.seleccionarConcepto(e));
     } else {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }

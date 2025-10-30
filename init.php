@@ -25,6 +25,12 @@
                 if ($funcion=="traerConceptoPorPeriodicidad"){
                     $result = $class->$funcion($_REQUEST["usuarioID"], $_REQUEST["token"], $_REQUEST["fecha"]);
                 }
+                if ($funcion=="traerConceptos"){
+                    $result = $class->$funcion($_REQUEST["usuarioID"], $_REQUEST["token"]);
+                }
+                if ($funcion=="traerDatos"){
+                    $result = $class->$funcion($_REQUEST["conceptoID"]);
+                }
             }
             if ($controlador=="gcuenta"){
                 if ($funcion=="enviarDatos"){
