@@ -156,7 +156,7 @@
               <!-- agrega opciones reales aquí -->
             </select>
           </div>
-
+          <input id="conceptoid" type="hidden"/>
           <div class="field">
             <label class="label" for="concepto-text">Concepto</label>
             <input id="concepto-text" type="text" placeholder="Value" />
@@ -229,9 +229,9 @@
 
         <!-- Columna derecha: botones -->
         <div class="actions">
-          <button type="button" class="btn-modificar" >Modificar</button>
-          <button type="button" class="btn-update">Guardar</button>
-          <button type="button" class="btn-nuevo" >Nuevo</button>
+          <button type="button" class="btn-update" id="btn-modificar">Modificar</button>
+          <button type="button" class="btn-update" id="btn-guardar">Guardar</button>
+          <button type="button" class="btn-update" id="btn-nuevo">Nuevo</button>
         </div>
       </div>
     </div>

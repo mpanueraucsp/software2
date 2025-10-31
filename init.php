@@ -31,6 +31,12 @@
                 if ($funcion=="traerDatos"){
                     $result = $class->$funcion($_REQUEST["conceptoID"]);
                 }
+                if ($funcion=="validarDatos"){
+                    $result = $class->$funcion($_REQUEST["conceptoid"],$_REQUEST["nombre"], $_REQUEST["tipo"], $_REQUEST["periodo"], $_REQUEST["dia"], $_REQUEST["usuarioID"], "");
+                }
+                if ($funcion=="actualizarEstado"){
+                    $result = $class->$funcion($_REQUEST["conceptoid"],$_REQUEST["estado"]);
+                }
             }
             if ($controlador=="gcuenta"){
                 if ($funcion=="enviarDatos"){

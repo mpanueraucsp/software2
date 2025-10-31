@@ -418,6 +418,20 @@ body, html {
   background: var(--primary-hover);
 }
 
+.btn-general {
+  padding: 12px 28px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-general:hover {
+  background: var(--primary-hover);
+}
+
 .sections-container {
   display: grid;
   grid-template-columns: 1fr 1fr;

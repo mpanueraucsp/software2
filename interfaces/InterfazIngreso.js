@@ -67,6 +67,7 @@ class InterfazIngreso {
     
     // construir el arreglo de datos
     const datos = Array.from(inputs).map(input => {
+      console.debug(input);
       const concepto_id = input.name; // el name del input
       const monto = parseFloat(input.value) || 0; // convertir a número, o 0 si está vacío
       return {
@@ -82,7 +83,8 @@ class InterfazIngreso {
 
     console.log('Enviando:', payload);
 
-    const base = 'http://localhost/software2/software2/api/gcuenta/enviarDatos/';
+    //const base = 'http://localhost/software2/software2/api/gcuenta/enviarDatos/';
+    var base = endpoint+`api/gcuenta/enviarDatos/`;
     const qs = new URLSearchParams();
     qs.set('datos', JSON.stringify(payload)); // encodifica seguro
 
@@ -199,7 +201,7 @@ class InterfazIngreso {
     list.innerHTML = this.ingresos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
-        <span class="item-amount"><input type="text" name='${item.concepto_id}'></input></span>
+        <span class="item-amount"><input type="text" name='${item.conceptoid}'></input></span>
       </div>
     `).join('');
   }
@@ -210,7 +212,7 @@ class InterfazIngreso {
     list.innerHTML = this.gastos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
-        <span class="item-amount"><input type="text" name='${item.concepto_id}'></input></span>
+        <span class="item-amount"><input type="text" name='${item.conceptoid}'></input></span>
       </div>
     `).join('');
   }
