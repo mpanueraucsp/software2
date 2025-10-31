@@ -113,4 +113,14 @@
         }
       });
     }
+  mostrarBalance() {
+     fetch('../pages/balance.html?v=' + Date.now(), { cache: 'no-store' })
+     .then(r => r.text())
+     .then(html => {
+        document.querySelector('#app-main').innerHTML = html;
+        window.uiBalance = new InterfazBalance();
+        window.uiBalance.mostrarPestana(this.token, this.tipoUsuario);
+     })
+     .catch(err => console.error('Error al cargar balance:', err));
   }
+}
