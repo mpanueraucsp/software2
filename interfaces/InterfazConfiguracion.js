@@ -6,6 +6,8 @@ class InterfazConfiguracion {
     this.asignarEventos();
 
   }
+  //FIC-001
+  //Funcion que se encarga de mostrar la pestaña de configuracion
   mostrarPestana(usuarioID, token){
     this.usuarioID = usuarioID;
     this.token = token;
@@ -15,6 +17,8 @@ class InterfazConfiguracion {
     //this.asignarEventos();
     console.debug("envetos");
   }
+  //FIC-002
+  //Funcion que se encarga de traer los conceptos creados por un usuario definido
   traerConceptos(usuarioID){
     console.debug("traerconceptos", this.usuarioID, this.token);
     //var url = endpoint+`api/gconcepto/traerConceptos/`;
@@ -36,6 +40,8 @@ class InterfazConfiguracion {
       alert('No se pudo conectar con el servidor.');
     }
   }
+  //FIC-003
+  //Funcion que permite seleccionar un concepto y traer los datos del concepto seleccionado
   seleccionarConcepto(){
     const select = document.getElementById("concepto-select");
     const conceptoid = select.value; 
@@ -57,6 +63,8 @@ class InterfazConfiguracion {
       alert('No se pudo conectar con el servidor.');
     }
   }
+  //FIC-004
+  //Funcion que se encarga de llenar los datos de un concepto en el formulario de conceptos para su modificacion
   llenarDatosConcepto(data){
     var c = data[0];
     const select = document.getElementById("concepto-select");
@@ -99,6 +107,8 @@ class InterfazConfiguracion {
                   (c.estado !== "1" && r.value === "deshabilitado");
     });
   }
+  //FIC-005
+  //Funcion que se encarga de llenar en el combo de modificacion los conceptos creados por el usuario
   llenarComboConcepto(data){
     const select = document.getElementById("concepto-select");
     select.innerHTML = '<option value="">Seleccione...</option>'; // limpiar primero
@@ -111,9 +121,13 @@ class InterfazConfiguracion {
     });
   }
   // Inicializar la página
+  //FIC-006
+  //Funcion de inicializacion
   init() {
     
   }
+  //FIC-007
+  //Funcion que se activa al dar click en el boton modificar, permite guardar los datos modificados
   clickModificar(){
     const nombre = document.getElementById("concepto-text").value.trim();
     const tipo = document.querySelector('input[name="tipo"]:checked')?.value || "";
@@ -135,7 +149,6 @@ class InterfazConfiguracion {
     }
 
     // construir URL con parámetros
-    //const baseURL = "http://localhost/software2/software2/api/gconcepto/validarParametros/";
     var baseURL = endpoint+`api/gconcepto/validarDatos/`;
     const params = new URLSearchParams({
       conceptoid: conceptoID,
@@ -170,6 +183,8 @@ class InterfazConfiguracion {
         //alert("Error al enviar los datos");
       });
   }
+  //FIC-008
+  //Funcion que permite limpiar los componentes del formulario
   limpiarDatos(){
      const select = document.getElementById("concepto-select");
       select.value = "";  // deja sin selección
@@ -188,6 +203,8 @@ class InterfazConfiguracion {
       periodoRadios.forEach(r => r.checked = false);
       estadoRadios.forEach(r => r.checked = false);
   }
+  //FIC-009
+  //Funcion que se habilita al dar click en deshabilitar o habilitar un concepto
   clicOpcionDeshabilitar() {
     const conceptoID = document.getElementById("conceptoid").value;
     const estado = document.querySelector('input[name="estado"]:checked')?.value || "";
@@ -227,6 +244,8 @@ class InterfazConfiguracion {
         //alert("Error al enviar los datos");
       });
   }
+  //FIC-010
+  //Funcion que permite guardar un nuevo concepto
   clickGuardar(){
     const nombre = document.getElementById("concepto-text").value.trim();
     const tipo = document.querySelector('input[name="tipo"]:checked')?.value || "";
@@ -267,6 +286,7 @@ class InterfazConfiguracion {
         if (data.valido){
           if (data.guardarOk){
             this.mostrarMensaje("Concepto creado satisfactoriamente");
+            this.limpiarDatos();
           }
         }else{
           this.mostrarMensaje("Concepto ya existe");
@@ -277,9 +297,13 @@ class InterfazConfiguracion {
         //alert("Error al enviar los datos");
       });
   }
+  //FIC-011
+  //Funcion que muestra el mensaje enviado
   mostrarMensaje(mensaje){
     alert(mensaje)
   }
+  //FIC-012
+  //Funcion que permite habilitar el componente dia al seleccionar el periodo
   actualizarCampoDia(periodo){
     const diaInput = document.getElementById("dia-input");
     const periodoRadios = document.getElementsByName("periodo");
@@ -327,6 +351,8 @@ class InterfazConfiguracion {
         diaInput.oninput = null;
     }
   }
+  //FIC-013
+  //Funcion que se ejecuta al iniciar y permite vincular los componentes con sus acciones
   asignarEventos(){
     //document.addEventListener("DOMContentLoaded", () => {
       var btn = document.getElementById('btn-guardar');

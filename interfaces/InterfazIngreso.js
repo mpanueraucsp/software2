@@ -6,6 +6,8 @@ class InterfazIngreso {
     this.colocarFechaActual();
     this.asignarEventos();
   }
+  //FIC-001
+  //Funcion que se encarga de mostrar la pestaña de configuracion
   mostrarPestana(usuarioID, token){
     this.usuarioID = usuarioID;
     this.token = token;

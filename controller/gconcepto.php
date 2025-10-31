@@ -109,7 +109,6 @@
          *
          * @param int $usuario_id ID del usuario que crea el concepto.
          * @param string $token Token de autenticación.
-         * @param date $fecha fecha para la periodicidad.
          * @return listado, de los conceptos de acuerdo a la periodicidad
          */
         function traerConceptos($usuarioID, $token){
@@ -139,13 +138,10 @@
             echo json_encode(['error' => $e->getMessage()]);
         }
         }
-        /**FCC-003
-         * se encarga de traer los conceptos de acuerdo al usuario
+        /**FCC-004
+         * se encarga de traer el conceptos de acuerdo al id
          *
-         * @param int $usuario_id ID del usuario que crea el concepto.
-         * @param string $token Token de autenticación.
-         * @param date $fecha fecha para la periodicidad.
-         * @return listado, de los conceptos de acuerdo a la periodicidad
+         * @param int $conceptoid ID del concepto.
          */
         function traerDatos($conceptoID){
             $this->conceptoID = $conceptoID;
@@ -175,7 +171,7 @@
             }
         }
         /**
-         * FCC-004
+         * FCC-005
          * encarga de validar si el concepto existe y guardar los datos
          *
          * @param string $nombre Nombre del concepto.
@@ -231,7 +227,7 @@
             }
         }
         /**
-         * FCC-005
+         * FCC-006
          * Actualizar estado
          *
          * @param int $conceptoID id del concepto

@@ -38,6 +38,7 @@
    }
    seleccionarConfiguracion(){
       //console.debug("entro aqio");
+      var scope = this;
       fetch('../pages/configuracion.html')
       .then(r => r.text())
       .then(html => {
@@ -48,11 +49,13 @@
         console.debug(this.usuarioID, this.token);
         window.uiConfiguracion.mostrarPestana(this.usuarioID, this.token);
         //window.uiIngreso.usuarioID = 
+        scope.activarSideBar("configuracion");
       })
       .catch(err => console.error('Error al cargar configuracion:', err));
       
    }
    mostrarIngresoDiario(){
+    var scope = this;
       //console.debug("entro aqio");
       fetch('../pages/ingreso_diario.html')
       .then(r => r.text())
@@ -63,6 +66,7 @@
         window.uiIngreso = new InterfazIngreso();
         console.debug(this.usuarioID, this.token);
         window.uiIngreso.mostrarPestana(this.usuarioID, this.token);
+        scope.activarSideBar("ingreso-diario");
         //window.uiIngreso.usuarioID = 
       })
       .catch(err => console.error('Error al cargar ingreso_diario:', err));
@@ -78,5 +82,35 @@
         this.token = token;
         this.tipoUsuario = tipoUsuario;
     }
+    activarSideBar(currentPage) {
+      // Cargar el HTML del sidebar
+      console.debug("entro a activar");
+          // Marcar la página activa
+      document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+        console.debug(item);
+        item.classList.remove('active');
+        if (item.dataset.page === currentPage) {
+          item.classList.add('active');
+          
+          // Cambiar la estrella a llena
+          const icon = item.querySelector('.nav-icon');
+          if (icon && icon.textContent === '☆') {
+            icon.textContent = '★';
+          }
+          
+          // Poner el label en mayúsculas y bold
+          const label = item.querySelector('.nav-label');
+          if (label) {
+            label.style.textTransform = 'uppercase';
+            label.style.fontWeight = '600';
+          }
 
+          // Poner la descripción en blanco
+          const desc = item.querySelector('.nav-desc');
+          if (desc) {
+            desc.style.color = 'white';
+          }
+        }
+      });
+    }
   }
