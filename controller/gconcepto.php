@@ -10,9 +10,10 @@
         public $dia;
         public $usuarioID;
         public $token;
+        public $conceptoID;
 
         /**
-         * FC-001
+         * FCC-001
          * encarga de validar si el concepto existe y guardar los datos
          *
          * @param string $nombre Nombre del concepto.
@@ -67,7 +68,7 @@
                 return array("valido"=>false);
             }
         }
-        /**FC-002
+        /**FCC-002
          * se encarga de traer los conceptos de acuerdo a la periodicidad de la fecha
          *
          * @param int $usuario_id ID del usuario que crea el concepto.
@@ -103,7 +104,7 @@
             echo json_encode(['error' => $e->getMessage()]);
         }
         }
-        /**FC-003
+        /**FCC-003
          * se encarga de traer los conceptos de acuerdo al usuario
          *
          * @param int $usuario_id ID del usuario que crea el concepto.
@@ -121,6 +122,41 @@
             // 2. Consulta que llama a la función PostgreSQL
             $sql = "SELECT * FROM traerConceptos($1)";
             $params = [$this->usuarioID];
+
+            // 3. Ejecutar la función con parámetros
+            $result = $db->queryParams($sql, $params);
+
+            // 4. Obtener todos los registros devueltos
+            $conceptos = [];
+            while ($row = pg_fetch_assoc($result)) {
+                $conceptos[] = $row;
+            }
+
+            // 5. devolver el listado
+            return $conceptos;
+
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        }
+        /**FCC-003
+         * se encarga de traer los conceptos de acuerdo al usuario
+         *
+         * @param int $usuario_id ID del usuario que crea el concepto.
+         * @param string $token Token de autenticación.
+         * @param date $fecha fecha para la periodicidad.
+         * @return listado, de los conceptos de acuerdo a la periodicidad
+         */
+        function traerDatos($conceptoID){
+            $this->conceptoID = $conceptoID;
+            try {
+            // 1. Obtener instancia única de la conexión
+            $db = Database::getInstance();
+
+            
+            // 2. Consulta que llama a la función PostgreSQL
+            $sql = "SELECT * FROM consultarDatos($1)";
+            $params = [$this->conceptoID];
 
             // 3. Ejecutar la función con parámetros
             $result = $db->queryParams($sql, $params);
