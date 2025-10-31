@@ -200,39 +200,92 @@ class InterfazIngreso {
   // Renderizar lista de ingresos
   renderIngresos() {
     const list = document.getElementById('ingresos-list');
+
+    // Renderizar los inputs
     list.innerHTML = this.ingresos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
-        <span class="item-amount"><input type="text" name='${item.conceptoid}'></input></span>
+        <span class="item-amount">
+          <input 
+            type="number" 
+            name="${item.conceptoid}" 
+            value="${item.monto || ''}" 
+            class="input-ingreso"
+            min="0"
+            step="0.01"
+          />
+        </span>
       </div>
     `).join('');
+
+    // 🔹 Después de crear los inputs, agregar eventos para totalizar
+    const inputs = list.querySelectorAll('.input-ingreso');
+    inputs.forEach(input => {
+      input.addEventListener('input', () => this.calcularTotales());
+    });
   }
 
   // Renderizar lista de gastos
   renderGastos() {
     const list = document.getElementById('gastos-list');
-    list.innerHTML = this.gastos.map(item => `
+
+    // Renderizar los inputs
+    list.innerHTML = this.ingresos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
-        <span class="item-amount"><input type="text" name='${item.conceptoid}'></input></span>
+        <span class="item-amount">
+          <input 
+            type="number" 
+            name="${item.conceptoid}" 
+            value="${item.monto || ''}" 
+            class="input-gastos"
+            min="0"
+            step="0.01"
+          />
+        </span>
       </div>
     `).join('');
+
+    // 🔹 Después de crear los inputs, agregar eventos para totalizar
+    const inputs = list.querySelectorAll('.input-gastos');
+    inputs.forEach(input => {
+      input.addEventListener('input', () => this.calcularTotales());
+    });
   }
 
   // Calcular todos los totales
   calcularTotales() {
-    const totalIngresos = this.ingresos.reduce((sum, item) => sum + item.monto, 0);
-    const totalGastos = this.gastos.reduce((sum, item) => sum + item.monto, 0);
-    const totalGeneral = totalIngresos - totalGastos;
+    const inputs = document.querySelectorAll('.input-ingreso');
+    var total = 0;
+    var totalGastos = 0;
 
+    inputs.forEach(inp => {
+      const val = parseFloat(inp.value);
+      if (!isNaN(val)) total += val;
+    });
+
+    const gastos = document.querySelectorAll('.input-gastos');
+
+    gastos.forEach(inp => {
+      const val = parseFloat(inp.value);
+      if (!isNaN(val)) totalGastos += val;
+    });
+
+    // Mostrar el total con dos decimales
+    //document.getElementById('total-ingresos').textContent = total.toFixed(2);
+    const totalIngresos = total;
+    //const totalGastos = this.gastos.reduce((sum, item) => sum + item.monto, 0);
+    //const totalGastos = totalGastos;
+    const totalGeneral = totalIngresos - totalGastos;
+    //console.debug(document.getElementById('total-ingresos'), totalIngresos.toFixed(2));
     document.getElementById('total-ingresos').textContent = totalIngresos.toFixed(2);
     document.getElementById('total-gastos').textContent = totalGastos.toFixed(2);
-    document.getElementById('total-ingresos').textContent = "";
-    document.getElementById('total-gastos').textContent = "";
-    //document.getElementById('gasto-hoy').textContent = totalGastos.toFixed(2)||0.00;
+    //document.getElementById('total-ingresos').textContent = "";
+    //document.getElementById('total-gastos').textContent = "";
+    document.getElementById('gasto-hoy').textContent = totalGeneral.toFixed(2)||0.00;
     //document.getElementById('total-general').textContent = totalGeneral.toFixed(2);
-    document.getElementById('gasto-hoy').textContent = "0.00";
-    document.getElementById('total-general').textContent = "0.00";
+    //document.getElementById('gasto-hoy').textContent = "0.00";
+    //document.getElementById('total-general').textContent = "0.00";
   }
 
   // Buscar datos por fecha
