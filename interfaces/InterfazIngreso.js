@@ -230,7 +230,7 @@ class InterfazIngreso {
     const list = document.getElementById('gastos-list');
 
     // Renderizar los inputs
-    list.innerHTML = this.ingresos.map(item => `
+    list.innerHTML = this.gastos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
         <span class="item-amount">
