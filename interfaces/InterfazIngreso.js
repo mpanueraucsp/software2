@@ -146,7 +146,7 @@ class InterfazIngreso {
     totalGeneral.innerText = lista.total_general;
     //console.debug(totalGeneral);
   }
-  }//FIC008
+  //FIC008
   //Funcion que se encarga de asignar eventos
   asignarEventos() {
 
