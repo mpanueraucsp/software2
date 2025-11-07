@@ -11,6 +11,7 @@
       this.token = localStorage.getItem("token");
       this.tipoUsuario = localStorage.getItem("tipoUsuario");
       this.usuarioID = localStorage.getItem("usuarioID");
+      console.debug(this.usuarioID);
 
     const enlaces = document.querySelectorAll('.nav-item');
     enlaces.forEach(enlace => {
@@ -91,35 +92,54 @@
         item.classList.remove('active');
         if (item.dataset.page === currentPage) {
           item.classList.add('active');
-          
           // Cambiar la estrella a llena
           const icon = item.querySelector('.nav-icon');
           if (icon && icon.textContent === '☆') {
             icon.textContent = '★';
           }
-          
           // Poner el label en mayúsculas y bold
           const label = item.querySelector('.nav-label');
           if (label) {
             label.style.textTransform = 'uppercase';
             label.style.fontWeight = '600';
           }
-
           // Poner la descripción en blanco
           const desc = item.querySelector('.nav-desc');
           if (desc) {
             desc.style.color = 'white';
           }
+        }else{
+          item.classList.remove('active');
+          // Cambiar la estrella a llena
+          const icon = item.querySelector('.nav-icon');
+          //if (icon && icon.textContent === '☆') {
+            icon.textContent = '☆';
+          //}
+          // Poner el label en mayúsculas y bold
+          const label = item.querySelector('.nav-label');
+          if (label) {
+            label.style.textTransform = 'capitalize';
+            label.style.fontWeight = '400';
+          }
+          // Poner la descripción en blanco
+          const desc = item.querySelector('.nav-desc');
+          if (desc) {
+            desc.style.color = 'black';
+          }
         }
       });
     }
   mostrarBalance() {
+    console.debug(this.usuarioID);
+      var scope = this;
      fetch('../pages/balance.html?v=' + Date.now(), { cache: 'no-store' })
      .then(r => r.text())
      .then(html => {
         document.querySelector('#app-main').innerHTML = html;
         window.uiBalance = new InterfazBalance();
-        window.uiBalance.mostrarPestana(this.token, this.tipoUsuario);
+        //window.uiBalance.mostrarPestana(this.token, this.tipoUsuario);
+        window.uiBalance.mostrarPestana(this.usuarioID, "token", "admin");
+        scope.activarSideBar("balance");
      })
      .catch(err => console.error('Error al cargar balance:', err));
   }

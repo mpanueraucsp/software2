@@ -6,7 +6,7 @@ class InterfazIngreso {
     this.colocarFechaActual();
     this.asignarEventos();
   }
-  //FIC-001
+  //FIC001
   //Funcion que se encarga de mostrar la pestaña de configuracion
   mostrarPestana(usuarioID, token){
     this.usuarioID = usuarioID;
@@ -17,6 +17,8 @@ class InterfazIngreso {
   }
   ingresos = [];
   gastos = [];
+  //FIC002
+  //Funcion que se encarga de traer los conceptos
   traerConceptos(){
     console.debug(this.usuarioID, this.token);
     var url = endpoint+`api/gconcepto/traerConceptoPorPeriodicidad/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
@@ -38,6 +40,8 @@ class InterfazIngreso {
       alert('No se pudo conectar con el servidor.');
     }
   }
+  //FIC003
+  //Funcion que se encarga de mostrar los conceptos
   mostrarConceptos(data){
     for (const item of data) {
       console.debug(item.tipoconcepto);
@@ -54,18 +58,23 @@ class InterfazIngreso {
     this.renderGastos();
     this.calcularTotales();
   }
+  //FIC004
+  //Funcion que se encarga de 
   // Inicializar fecha actual
   colocarFechaActual() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('fecha').value = today;
     this.fecha = today;
   }
+  //FIC005
+  //Funcion que se encarga de actualizar
   clickActualizar(e){
     const usuarioID = this.usuarioID; // asumimos que estás dentro de una clase y tienes usuarioID definido
     const fecha = document.getElementById('fecha').value; // obtiene la fecha del input date
     
     // buscar todos los inputs dentro de span.item-amount
-    const inputs = document.querySelectorAll('span.item-amount input[type="text"]');
+    const inputs = document.querySelectorAll('input[type="number"]');
+    //const inputs = document.querySelectorAll('span.item-amount input[type="text"]');
     
     // construir el arreglo de datos
     const datos = Array.from(inputs).map(input => {
@@ -104,6 +113,8 @@ class InterfazIngreso {
       })
     .catch(err => console.error('Error al enviar datos:', err));
   }
+  //FIC006
+  //Funcion que se encarga de mostrar mensajes
   mostrarMensaje(mensaje){
     alert(mensaje);
   }
@@ -127,12 +138,16 @@ class InterfazIngreso {
       alert('No se pudo conectar con el servidor.');
     }
   }
+  //FIC007
+  //Funcion que se encarga de mostrar el balance
   mostrarBalance(lista){
     //console.debug(lista);
     const totalGeneral = document.getElementById('total-general'); // obtiene el elemento total general
     totalGeneral.innerText = lista.total_general;
     //console.debug(totalGeneral);
   }
+  }//FIC008
+  //Funcion que se encarga de asignar eventos
   asignarEventos() {
 
     const btn = document.querySelector('.btn-update');
@@ -142,7 +157,15 @@ class InterfazIngreso {
     } else {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }
+    const btn1 = document.querySelector('.btn-edit');
+    if (btn1) {
+      // Usa función flecha para mantener el contexto del "this"
+      btn.addEventListener('click', (e) => this.clickEditarRegistro(e));
+    } else {
+      console.warn(" No se encontró el botón .btn-update en el DOM");
+    }
   }
+  //FIC009
   // Agregar ingreso cuando se ingresa un monto
   setupIngresoListener() {
     document.getElementById('ingreso-monto').addEventListener('change', function() {
@@ -169,7 +192,8 @@ class InterfazIngreso {
       }
     });
   }
-
+  //FIC010
+  // Agregar ingreso cuando se ingresa un monto
   // Agregar gasto cuando se ingresa un monto
   setupGastoListener() {
     document.getElementById('gasto-monto').addEventListener('change', function() {
@@ -196,7 +220,7 @@ class InterfazIngreso {
       }
     });
   }
-
+  //FIC012
   // Renderizar lista de ingresos
   renderIngresos() {
     const list = document.getElementById('ingresos-list');
@@ -224,7 +248,7 @@ class InterfazIngreso {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
-
+  //FIC013
   // Renderizar lista de gastos
   renderGastos() {
     const list = document.getElementById('gastos-list');
@@ -252,7 +276,7 @@ class InterfazIngreso {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
-
+  //FIC014
   // Calcular todos los totales
   calcularTotales() {
     const inputs = document.querySelectorAll('.input-ingreso');
@@ -287,24 +311,32 @@ class InterfazIngreso {
     //document.getElementById('gasto-hoy').textContent = "0.00";
     //document.getElementById('total-general').textContent = "0.00";
   }
-
-  // Buscar datos por fecha
-  buscarPorFecha() {
+  //FIC015
+  // Editar
+  clickEditarRegistro() {
     const fecha = document.getElementById('fecha').value;
-    
-    // Aquí irá la llamada a tu API PHP
-    // fetch(`../api/buscar-por-fecha.php?fecha=${fecha}`)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     ingresos = data.ingresos;
-    //     gastos = data.gastos;
-    //     renderIngresos();
-    //     renderGastos();
-    //     calcularTotales();
-    //   });
-    
-    alert('Buscar datos para fecha: ' + fecha);
-    console.log('Fecha seleccionada:', fecha);
+    console.debug(this.usuarioID, this.token);
+    var url = endpoint+`api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
+    var scope = this;
+    try {
+      fetch(url)
+      .then(resp => {
+        return resp.json(); 
+      })
+      .then(data => {
+        console.debug(data);
+        scope.mostrarCuenta(data);
+      })
+      .catch(err => console.error("Error:", err));
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('No se pudo conectar con el servidor.');
+    }
+
+  }
+  mostrarCuenta(lista){
+
   }
 
   // Guardar/Actualizar datos

@@ -51,5 +51,41 @@
             //var_dump($r);
             return array("success"=>$r["ok"]);
         }
+         /**
+         * FCM002
+         * encarga de validar si el concepto existe y guardar los datos
+         *
+         * @param datos lista que trae los registros de movimientos[Fecha, usuario_id, concepto_id, monto]
+         * @param string $token Token de autenticación.
+         * @return valido=true, si el concepto es valido, y guardarOk=true, si se guardo.
+         */
+        function cargarDatosUsuario(){
+          if ($fecha=="") $fecha = date("d/m/Y");
+                $this->usuarioID = $usuarioID;
+                try {
+                // 1. Obtener instancia única de la conexión
+                $db = Database::getInstance();
+
+                
+                // 2. Consulta que llama a la función PostgreSQL
+                $sql = "SELECT * FROM traerConceptos($1, $2)";
+                $params = [$this->usuarioID, $fecha];
+
+                // 3. Ejecutar la función con parámetros
+                $result = $db->queryParams($sql, $params);
+
+                // 4. Obtener todos los registros devueltos
+                $conceptos = [];
+                while ($row = pg_fetch_assoc($result)) {
+                    $conceptos[] = $row;
+                }
+
+                // 5. devolver el listado
+                return $conceptos;
+
+            } catch (Exception $e) {
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+        }
     };
 ?>

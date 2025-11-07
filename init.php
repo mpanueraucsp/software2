@@ -17,6 +17,9 @@
                 if ($funcion=="validarParametros"){
                     $result = $class->$funcion($_REQUEST["usuario"], $_REQUEST["contrasena"]);
                 }
+                if ($funcion=="mostrarUsuarios"){
+                    $result = $class->$funcion();
+                }
             }
             if ($controlador=="gconcepto"){
                 if ($funcion=="validarParametros"){
@@ -42,10 +45,16 @@
                 if ($funcion=="enviarDatos"){
                     $result = $class->$funcion($_REQUEST["datos"]);
                 }
+                if ($funcion=="cargarDatosUsuario"){
+                    $result = $class->$funcion($_REQUEST["usuarioID"], $_REQUEST["token"], $_REQUEST["fecha"]);
+                }
             }
             if ($controlador=="gbalance"){
                 if ($funcion=="traerBalance"){
                     $result = $class->$funcion($_REQUEST["usuarioID"], "");
+                }
+                if ($funcion=="traerBalanceLista"){
+                    $result = $class->$funcion("", $_REQUEST["usuarioID"], $_REQUEST["tipoUsuario"], $_REQUEST["fecha"]);
                 }
             }
             

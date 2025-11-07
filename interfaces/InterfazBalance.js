@@ -1,71 +1,157 @@
 class InterfazBalance {
   token;
   tipoUsuario;
+  usuario;
   constructor() {
     this.asignarEventosBase();
-    this.colocarFechaActual();
-    this.mostrarComboUsuario();
   }
-  mostrarPestana(token, tipoUsuario){
+  /*
+    FIB-001
+    Mostrar la pestana de balance;
+  */
+  mostrarPestana(usuario, token, tipoUsuario){
     this.token = token;
     this.tipoUsuario = tipoUsuario;
+    this.usuario = usuario;
+    this.colocarFechaActual();
+    this.mostrarCombo();
+    this.traerBalance();
   }
+  /*
+    FIB-002
+    coloca la fecha actual en el campo fecha;
+  */
   colocarFechaActual(){
     const inputFecha = document.getElementById('fecha');
     if (!inputFecha) return;
     const hoy = new Date().toISOString().split('T')[0];
     inputFecha.value = hoy;
   }
-  mostrarComboUsuario(){
-    const lista = [
-      { value: 'yo', label: 'Yo' },
-      { value: 'padre', label: 'Padre' },
-      { value: 'madre', label: 'Madre' },
-      { value: 'hijo', label: 'Hijo' },
-      { value: 'hija', label: 'Hija' },
-      { value: 'esposa', label: 'Esposa' },
-    ];
-    this.llenarComboUsuarios(lista);
+  /*
+    FIB-003
+    mostrarCombo: Si el tipo de usuario es administrador, muestra el combo de usuarios
+  */
+  mostrarCombo(){
+    console.debug(this.tipoUsuario);
+    if (this.tipoUsuario=="admin"){
+      var url = endpoint+`api/gusuario/mostrarUsuarios/?token=${encodeURIComponent(this.token)}`;
+      var scope = this;
+      try {
+        fetch(url)
+        .then(resp => {
+          return resp.json(); 
+        })
+        .then(lista => {
+          console.debug(lista);
+          scope.llenarComboUsuarios(lista);
+        })
+        .catch(err => console.error("Error:", err));
+
+      } catch (error) {
+        console.error('Error:', error);
+        alert('No se pudo conectar con el servidor.');
+      }
+    }
+    
   }
-  llenarComboUsuarios(lista){
+  /*
+    FIB-004
+    llena el combo con los datos del servidor
+  */
+  llenarComboUsuarios(lista) {
     const select = document.getElementById('usuario');
     if (!select) return;
+  
+    // Limpia opciones anteriores
     select.innerHTML = '';
+  
+    // Recorre la lista JSON y agrega las opciones
     for (const item of lista) {
       const option = document.createElement('option');
-      option.value = item.value;
-      option.textContent = item.label;
+      option.value = item.usuarioID;           // valor interno
+      option.textContent = item.nombre;        // texto visible
       select.appendChild(option);
     }
-    select.value = 'yo';
   }
+   /*
+    FIB-005
+    TraerBalance, trae el balance del usuario actual
+  */
+    traerBalance(){
+      var scope = this;
+      console.debug(this.usuario);
+      var ofecha = document.getElementById('fecha');
+      var fecha = ofecha.value;
+      console.debug(fecha);
+      if (this.tipoUsuario=="admin"){
+        var url = endpoint+`api/gbalance/traerBalanceLista/?token=${encodeURIComponent(this.token)}&usuarioID=${encodeURIComponent(this.usuario)}&tipoUsuario=${encodeURIComponent(this.tipoUsuario)}&fecha=${encodeURIComponent(fecha)}`;
+        var scope = this;
+        try {
+          fetch(url)
+          .then(resp => {
+            return resp.json(); 
+          })
+          .then(lista => {
+            console.debug(lista);
+            scope.mostrarDatos(lista);
+            //scope.llenarComboUsuarios(lista);
+          })
+          .catch(err => console.error("Error:", err));
+  
+        } catch (error) {
+          console.error('Error:', error);
+          alert('No se pudo conectar con el servidor.');
+        }
+      }
+      
+    }
   mostrarDatos(lista){
-    const ingresosList = document.getElementById('ingresos-list');
-    const gastosList = document.getElementById('gastos-list');
-    if (!ingresosList || !gastosList) return;
-    ingresosList.innerHTML = '';
-    gastosList.innerHTML = '';
-    if (!lista) return;
-    for (const ingreso of (lista.ingresos || [])) {
-      const row = document.createElement('div');
-      row.className = 'table-row';
-      row.innerHTML = `
-        <span class="col-fecha">${ingreso.fecha || ''}</span>
-        <span class="col-concepto">${ingreso.concepto || ''}</span>
-        <span class="col-monto">${ingreso.monto || ''}</span>
-      `;
-      ingresosList.appendChild(row);
+    const { listaBalance, listaMovimientos } = lista;
+
+    // --- Actualizar totales ---
+    document.getElementById("mensual").textContent = listaBalance?.mensual?.toFixed(2) || "0.00";
+    document.getElementById("todos-anos").textContent = listaBalance?.anual?.toFixed(2) || "0.00";
+
+    // --- Dividir movimientos ---
+    const ingresos = listaMovimientos.filter(m => m.tipoConcepto === 1);
+    const gastos   = listaMovimientos.filter(m => m.tipoConcepto === -1);
+
+    // --- Llenar listas ---
+    this.llenarTabla("ingresos-list", ingresos);
+    this.llenarTabla("gastos-list", gastos);
+
+    // --- Calcular totales ---
+    const totalIngresos = ingresos.reduce((acc, m) => acc + parseFloat(m.monto), 0);
+    const totalGastos   = gastos.reduce((acc, m) => acc + parseFloat(m.monto), 0);
+
+    document.getElementById("total-ingresos").textContent = totalIngresos.toFixed(2);
+    document.getElementById("total-gastos").textContent   = totalGastos.toFixed(2);
+  }
+  llenarTabla(idContenedor, movimientos) {
+    const contenedor = document.getElementById(idContenedor);
+    contenedor.innerHTML = "";
+  
+    if (movimientos.length === 0) {
+      contenedor.innerHTML = `<div class="table-row" style="opacity:.6;">No hay movimientos</div>`;
+      return;
     }
-    for (const gasto of (lista.gastos || [])) {
-      const row = document.createElement('div');
-      row.className = 'table-row';
+  
+    for (const m of movimientos) {
+      const row = document.createElement("div");
+      row.className = "table-row";
       row.innerHTML = `
-        <span class="col-fecha">${gasto.fecha || ''}</span>
-        <span class="col-concepto">${gasto.concepto || ''}</span>
-        <span class="col-monto">${gasto.monto || ''}</span>
+        <span class="col-fecha">${this.formatearFecha(m.fecha)}</span>
+        <span class="col-concepto">${m.concepto}</span>
+        <span class="col-monto">${Number(m.monto).toFixed(2)}</span>
       `;
-      gastosList.appendChild(row);
+      contenedor.appendChild(row);
     }
+  }
+  
+  formatearFecha(fechaStr) {
+    const [year, month, day] = fechaStr.split('-');
+    const f = new Date(year, month - 1, day);
+    return f.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
   seleccionarHistorial(){
     console.debug('Historial seleccionado');
