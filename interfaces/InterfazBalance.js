@@ -156,9 +156,32 @@ class InterfazBalance {
   seleccionarHistorial(){
     console.debug('Historial seleccionado');
   }
-  seleccionarGraficar(){
-    console.debug('Graficar seleccionado');
+
+  seleccionarGraficar() {
+  console.debug('Graficar seleccionado');
+
+  // Tomar fecha del input
+  const inputFecha = document.getElementById('fecha');
+  const fecha = inputFecha ? inputFecha.value : '';
+
+  // Usuario seleccionado en el combo (si existe)
+  const selectUsuario = document.getElementById('usuario');
+  const usuarioID = selectUsuario && selectUsuario.value
+    ? selectUsuario.value
+    : this.usuario;  // fallback al usuario actual
+
+  // Armar parámetros para enviar al PHP
+  const params = new URLSearchParams({
+    fecha: fecha,
+    usuarioID: usuarioID,
+    token: this.token,
+    tipoUsuario: this.tipoUsuario
+  });
+
+  // IMPORTANTE: usar la misma ruta que usabas en el onclick: '../balance_grafica.php'
+  window.location.href = '../balance_grafica.php?' + params.toString();
   }
+
   Operation1(){
     // método placeholder
   }
@@ -167,12 +190,28 @@ class InterfazBalance {
     if (!select) return;
     console.debug('Usuario seleccionado:', select.value);
   }
-  asignarEventosBase(){
-    const btnHist = document.querySelector('.btn-history');
-    if (btnHist) btnHist.addEventListener('click', () => this.seleccionarHistorial());
-    const btnGraph = document.querySelector('.btn-graph');
-    if (btnGraph) btnGraph.addEventListener('click', () => this.seleccionarGraficar());
-    const usuario = document.getElementById('usuario');
-    if (usuario) usuario.addEventListener('change', () => this.seleccionarUsuario());
-  }
+ asignarEventosBase() {
+  // Clicks en toda la página; filtramos por clases
+  document.addEventListener('click', (event) => {
+    const btnGraph = event.target.closest('.btn-graph');
+    if (btnGraph) {
+      this.seleccionarGraficar();
+      return;
+    }
+
+    const btnHist = event.target.closest('.btn-history');
+    if (btnHist) {
+      this.seleccionarHistorial();
+      return;
+    }
+  });
+
+  // Cambios en el combo de usuario
+  document.addEventListener('change', (event) => {
+    if (event.target.id === 'usuario') {
+      this.seleccionarUsuario();
+    }
+  });
+}
+
 }
