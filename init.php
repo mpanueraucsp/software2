@@ -50,11 +50,14 @@
                 }
             }
             if ($controlador=="gbalance"){
-                if ($funcion=="traerBalance"){
-                    $result = $class->$funcion($_REQUEST["usuarioID"], "");
+                if ($funcion=="traerGraficoIngresos"){
+                    $result = $class->$funcion("", $_REQUEST["usuarioID"]);
                 }
                 if ($funcion=="traerBalanceLista"){
                     $result = $class->$funcion("", $_REQUEST["usuarioID"], $_REQUEST["tipoUsuario"], $_REQUEST["fecha"]);
+                }
+                if ($funcion=="traerBalance"){
+                    $result = $class->$funcion($_REQUEST["usuarioID"], "");
                 }
             }
             

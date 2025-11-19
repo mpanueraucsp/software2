@@ -67,5 +67,27 @@
             ];
             //return array("lista"=>array("total_general"=>$balance["total_general"], "total_mensual"=>$balance["total_mensual"]));
         }
+        /**
+         * encarga de traer los datos para generar el grafico
+         *
+         * @param int $usuario_id ID del usuario del cual se genera el balance.
+         * @param string $token Token de autenticación.
+         * @param date $fecha si se requiere a una fecha determinada.
+         * @return lista que contiene el total_general y total_mensual.
+         */
+        function traerGraficoIngresos($token, $usuarioID){
+            
+            $db = Database::getInstance();
+            $sql = "SELECT * FROM traerResumen($1, $2)";
+
+            // INGRESOS
+            $resultIngresos = $db->queryParams($sql, [$usuarioID, '1']);
+            $ingresos = $db->fetchAll($resultIngresos);
+
+            // GASTOS
+            $resultGastos = $db->queryParams($sql, [$usuarioID, '2']);
+            $gastos = $db->fetchAll($resultGastos);
+            return array("ingresos"=>$ingresos, "gastos"=>$gastos);
+        }
     };
 ?>

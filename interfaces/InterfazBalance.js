@@ -159,27 +159,39 @@ class InterfazBalance {
 
   seleccionarGraficar() {
   console.debug('Graficar seleccionado');
+    var scope = this;
+    fetch('../pages/graficar.html')
+    .then(r => r.text())
+    .then(html => {
+      //console.debug(html);
+      //console.debug(document.querySelector('main'));
+      document.querySelector('main').innerHTML = html;
+      window.uiGrafico = new InterfazGrafico();
+      console.debug(this.usuario, this.token);
+      window.uiGrafico.mostrarPestana(this.usuario, this.token);
+    })
+    .catch(err => console.error('Error al cargar configuracion:', err));
+    // Tomar fecha del input
+    return true;
+    const inputFecha = document.getElementById('fecha');
+    const fecha = inputFecha ? inputFecha.value : '';
 
-  // Tomar fecha del input
-  const inputFecha = document.getElementById('fecha');
-  const fecha = inputFecha ? inputFecha.value : '';
+    // Usuario seleccionado en el combo (si existe)
+    const selectUsuario = document.getElementById('usuario');
+    const usuarioID = selectUsuario && selectUsuario.value
+      ? selectUsuario.value
+      : this.usuario;  // fallback al usuario actual
 
-  // Usuario seleccionado en el combo (si existe)
-  const selectUsuario = document.getElementById('usuario');
-  const usuarioID = selectUsuario && selectUsuario.value
-    ? selectUsuario.value
-    : this.usuario;  // fallback al usuario actual
+    // Armar parámetros para enviar al PHP
+    const params = new URLSearchParams({
+      fecha: fecha,
+      usuarioID: usuarioID,
+      token: this.token,
+      tipoUsuario: this.tipoUsuario
+    });
 
-  // Armar parámetros para enviar al PHP
-  const params = new URLSearchParams({
-    fecha: fecha,
-    usuarioID: usuarioID,
-    token: this.token,
-    tipoUsuario: this.tipoUsuario
-  });
-
-  // IMPORTANTE: usar la misma ruta que usabas en el onclick: '../balance_grafica.php'
-  window.location.href = '../balance_grafica.php?' + params.toString();
+    // IMPORTANTE: usar la misma ruta que usabas en el onclick: '../balance_grafica.php'
+    window.location.href = '../balance_grafica.php?' + params.toString();
   }
 
   Operation1(){
