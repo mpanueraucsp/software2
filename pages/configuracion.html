@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Configuración</title>
+<style>
+  :root{
+    --bg: #ffffff;
+    --card: #fafafa;
+    --muted: #777;
+    --text: #222;
+    --border: #e5e5e5;
+    --focus: #3866ff;
+    --btn-bg: #222;      /* botones oscuros como en el mockup */
+    --btn-bg-h: #000;
+    --btn-text: #fff;
+    --radius: 14px;
+    --space: 14px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{
+    max-width: 900px;
+    margin: 28px auto;
+    padding: 0 16px;
+  }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+
+  h2{
+    margin: 0 0 18px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  /* Layout principal: formulario a la izquierda, botones a la derecha */
+  .grid{
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Columna de controles */
+  .controls{
+    display: grid;
+    gap: 18px;
+  }
+
+  .field{
+    display: grid;
+    gap: 8px;
+  }
+
+  .label{
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  select, input[type="text"], input[type="date"], .fake-input{
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border .15s ease, box-shadow .15s ease;
+  }
+  select:focus, input[type="text"]:focus, input[type="date"]:focus{
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 20%, transparent);
+  }
+
+  /* Radios agrupados */
+  .radio-group{
+    display: grid;
+    gap: 10px;
+  }
+  .radio-row{
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .radio-col{
+    display: grid;
+    gap: 8px;
+  }
+  .radio-item{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+  }
+  .radio-item input[type="radio"]{
+    transform: translateY(1px);
+  }
+
+  /* Campo Día deshabilitado */
+  .fake-input[aria-disabled="true"],
+  input[disabled]{
+    background: #f3f3f3;
+    color: #9b9b9b;
+    border-style: dashed;
+  }
+
+  /* Botones columna derecha */
+  .actions{
+    display: grid;
+    gap: 18px;
+  }
+  .btn{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: none;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+    box-shadow: 0 2px 0 rgba(0,0,0,.15);
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn:hover{ background: var(--btn-bg-h); }
+
+  /* Responsivo */
+  @media (max-width: 760px){
+    .grid{ grid-template-columns: 1fr; }
+    .actions{ grid-auto-flow: column; justify-content: start; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h2>Configuración</h2>
+
+      <div class="grid">
+        <!-- Columna izquierda: formulario -->
+        <div class="controls">
+
+          <div class="field">
+            <label class="label" for="concepto-select">Para editar seleccione un Concepto</label>
+            <select id="concepto-select" aria-label="Seleccionar concepto">
+              <option value="">Value</option>
+              <!-- agrega opciones reales aquí -->
+            </select>
+          </div>
+          <input id="conceptoid" type="hidden"/>
+          <div class="field">
+            <label class="label" for="concepto-text">Concepto</label>
+            <input id="concepto-text" type="text" placeholder="Value" />
+          </div>
+
+          <!-- Tipo -->
+          <div class="field">
+            <div class="label">Tipo</div>
+            <div class="radio-row">
+              <label class="radio-item">
+                <input type="radio" name="tipo" value="ingreso" checked />
+                <span>Ingreso</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="tipo" value="gasto" />
+                <span>Gasto</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Periodo -->
+          <div class="field">
+            <div class="label">Periodo</div>
+            <div class="radio-col">
+              <label class="radio-item">
+                <input type="radio" name="periodo" value="unico" />
+                <span>Unico</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="periodo" value="diario" checked />
+                <span>Diario</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="periodo" value="semanal" />
+                <span>Semanal</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="periodo" value="quincenal" />
+                <span>Quincenal</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="periodo" value="mensual" />
+                <span>Mensual</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Día (deshabilitado) -->
+          <div class="field">
+            <label class="label" for="dia-input">Día</label>
+            <input id="dia-input" type="text" placeholder="¿Qué día de la semana?" disabled />
+          </div>
+
+          <!-- Estado -->
+          <div class="field">
+            <div class="label">Estado</div>
+            <div class="radio-row">
+              <label class="radio-item">
+                <input type="radio" name="estado" value="habilitado" checked />
+                <span>Habilitado</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="estado" value="deshabilitado" />
+                <span>Deshabilitado</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Columna derecha: botones -->
+        <div class="actions">
+          <button type="button" class="btn-update" id="btn-modificar">Modificar</button>
+          <button type="button" class="btn-update" id="btn-guardar">Guardar</button>
+          <button type="button" class="btn-update" id="btn-nuevo">Nuevo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

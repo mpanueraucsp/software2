@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <title>Login - Sistema de Planificación</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../style.css">
+  <script src="../js/endpoint.js"></script>
+  
+  <script src="../interfaces/InterfazPrincipal.js"></script>
+  <script src="../interfaces/InterfazLogin.js"></script>
+  <style>
+    body {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      width: min(520px, 92vw);
+    }
+
+    .title {
+      text-align: center;
+      letter-spacing: .5px;
+      font-weight: 600;
+      margin: 0 0 18px 0;
+    }
+
+    .actions {
+      margin-top: 8px;
+    }
+
+    .actions .btn-ghost {
+      margin-top: 12px;
+    }
+
+    @media (max-width:420px) {
+      .title {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h2 class="title">SISTEMA DE PLANIFICACION DE ECONOMIA FAMILIAR</h2>
+
+     <form id="formLogin" class="card" action="#" method="post" autocomplete="off">
+      <div class="control">
+        <label for="user">Usuario</label>
+        <input id="user" name="usuario" type="text" placeholder="Value" required />
+      </div>
+
+      <div class="control">
+        <label for="pass">Contraseña</label>
+        <input id="pass" name="contrasena" type="password" placeholder="Value" required />
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Iniciar Sesion</button>
+      </div>
+    </form>
+  </main>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => new InterfazLogin());
+  </script>
+</body>
+</html>
+    

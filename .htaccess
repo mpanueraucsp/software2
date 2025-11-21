@@ -1,0 +1,6 @@
+# Options +FollowSymLinks
+RewriteEngine On
+
+RewriteCond %{QUERY_STRING} ^(.*)$
+#RewriteRule ^api/(.*)/(.*)$ ./init.php?%1&tgs=$1
+RewriteRule ^api/([^/]+)/([^/]+)/?$ init.php?c=$1&f=$2 [QSA,L]
