@@ -1,3 +1,6 @@
+/**
+  * IU-006 Controlador GBalance se encarga de la gestion de los balances mensuales y anuales
+**/
 class InterfazBalance {
   token;
   tipoUsuario;
