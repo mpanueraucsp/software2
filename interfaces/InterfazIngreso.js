@@ -14,6 +14,7 @@ class InterfazIngreso {
     this.fecha = "";
     console.debug(usuarioID, token);
     this.traerConceptos();
+    this.traerBalance();
   }
   ingresos = [];
   gastos = [];
@@ -43,6 +44,8 @@ class InterfazIngreso {
   //FIC003
   //Funcion que se encarga de mostrar los conceptos
   mostrarConceptos(data){
+    this.ingresos = [];
+    this.gastos = [];
     for (const item of data) {
       console.debug(item.tipoconcepto);
       if (item.tipoconconcepto=="1"){
@@ -52,6 +55,8 @@ class InterfazIngreso {
         this.gastos.push(item);
       }
     }
+    
+    
     console.debug(this.ingresos);
     console.debug(this.gastos);
     this.renderIngresos();
@@ -143,7 +148,8 @@ class InterfazIngreso {
   mostrarBalance(lista){
     //console.debug(lista);
     const totalGeneral = document.getElementById('total-general'); // obtiene el elemento total general
-    totalGeneral.innerText = lista.total_general;
+    totalGeneral.innerText = lista.total_mensual;
+    //totalGeneral.innerText = lista.total_general;
     //console.debug(totalGeneral);
   }
   //FIC008
@@ -158,9 +164,10 @@ class InterfazIngreso {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }
     const btn1 = document.querySelector('.btn-edit');
+    console.debug("entro a asignar eventos", btn1);
     if (btn1) {
       // Usa función flecha para mantener el contexto del "this"
-      btn.addEventListener('click', (e) => this.clickEditarRegistro(e));
+      btn1.addEventListener('click', (e) => this.clickEditarRegistro(e));
     } else {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }
@@ -316,7 +323,7 @@ class InterfazIngreso {
   clickEditarRegistro() {
     const fecha = document.getElementById('fecha').value;
     console.debug(this.usuarioID, this.token);
-    var url = endpoint+`api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
+    var url = endpoint+`api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(fecha)}`;
     var scope = this;
     try {
       fetch(url)
@@ -336,7 +343,7 @@ class InterfazIngreso {
 
   }
   mostrarCuenta(lista){
-
+    this.mostrarConceptos(lista)
   }
 
   // Guardar/Actualizar datos

@@ -11,7 +11,7 @@
       this.token = localStorage.getItem("token");
       this.tipoUsuario = localStorage.getItem("tipoUsuario");
       this.usuarioID = localStorage.getItem("usuarioID");
-      console.debug(this.usuarioID);
+      console.debug(this.usuarioID, this.tipoUsuario);
 
     const enlaces = document.querySelectorAll('.nav-item');
     enlaces.forEach(enlace => {
@@ -159,8 +159,8 @@
      .then(html => {
         document.querySelector('#app-main').innerHTML = html;
         window.uiBalance = new InterfazBalance();
-        //window.uiBalance.mostrarPestana(this.token, this.tipoUsuario);
-        window.uiBalance.mostrarPestana(this.usuarioID, "token", "admin");
+        window.uiBalance.mostrarPestana(this.usuarioID, "token", this.tipoUsuario);
+        //window.uiBalance.mostrarPestana(this.usuarioID, "token", "admin");
         scope.activarSideBar("balance");
      })
      .catch(err => console.error('Error al cargar balance:', err));

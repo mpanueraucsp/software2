@@ -59,7 +59,7 @@
          * @param string $token Token de autenticación.
          * @return valido=true, si el concepto es valido, y guardarOk=true, si se guardo.
          */
-        function cargarDatosUsuario(){
+        function cargarDatosUsuario($usuarioID, $token, $fecha){
           if ($fecha=="") $fecha = date("d/m/Y");
                 $this->usuarioID = $usuarioID;
                 try {
@@ -68,7 +68,7 @@
 
                 
                 // 2. Consulta que llama a la función PostgreSQL
-                $sql = "SELECT * FROM traerConceptos($1, $2)";
+                $sql = "SELECT * FROM obtenerCuentaUsuario($1, $2)";
                 $params = [$this->usuarioID, $fecha];
 
                 // 3. Ejecutar la función con parámetros

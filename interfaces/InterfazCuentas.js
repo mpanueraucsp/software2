@@ -129,7 +129,7 @@ class InterfazCuentas {
     });
 
     // 4. Ejecutar petición AJAX (Fetch)
-    var url = endpoint + `controller/init.php?${params.toString()}`;    
+    var url = endpoint + `api/gusuario/crearUsuario/?${params.toString()}`;    
     console.log("Enviando datos a:", url); 
 
     fetch(url)

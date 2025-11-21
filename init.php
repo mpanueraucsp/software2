@@ -76,6 +76,9 @@
                 if ($funcion=="traerBalance"){
                     $result = $class->$funcion($_REQUEST["usuarioID"], "");
                 }
+                if ($funcion=="traerHistorial"){
+                    $result = $class->$funcion("", $_REQUEST["usuarioID"], $_REQUEST["fechainicio"], $_REQUEST["fechafin"]);
+                }
             }
             
             if (is_array($result)){

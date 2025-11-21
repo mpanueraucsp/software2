@@ -33,7 +33,7 @@ class InterfazBalance {
   */
   mostrarCombo(){
     console.debug(this.tipoUsuario);
-    if (this.tipoUsuario=="admin"){
+    if (this.tipoUsuario=="ADMINISTRADOR"){
       var url = endpoint+`api/gusuario/mostrarUsuarios/?token=${encodeURIComponent(this.token)}`;
       var scope = this;
       try {
@@ -64,7 +64,12 @@ class InterfazBalance {
   
     // Limpia opciones anteriores
     select.innerHTML = '';
-  
+    if (this.tipoUsuario=="ADMINISTRADOR"){
+      const option = document.createElement('option');
+      option.value = 0;           // valor interno
+      option.textContent = "TODOS";        // texto visible
+      select.appendChild(option);
+    }
     // Recorre la lista JSON y agrega las opciones
     for (const item of lista) {
       const option = document.createElement('option');
@@ -83,7 +88,7 @@ class InterfazBalance {
       var ofecha = document.getElementById('fecha');
       var fecha = ofecha.value;
       console.debug(fecha);
-      if (this.tipoUsuario=="admin"){
+      //if (this.tipoUsuario=="ADMINISTRADOR"){
         var url = endpoint+`api/gbalance/traerBalanceLista/?token=${encodeURIComponent(this.token)}&usuarioID=${encodeURIComponent(this.usuario)}&tipoUsuario=${encodeURIComponent(this.tipoUsuario)}&fecha=${encodeURIComponent(fecha)}`;
         var scope = this;
         try {
@@ -102,7 +107,7 @@ class InterfazBalance {
           console.error('Error:', error);
           alert('No se pudo conectar con el servidor.');
         }
-      }
+      //}
       
     }
   mostrarDatos(lista){
@@ -154,12 +159,29 @@ class InterfazBalance {
     return f.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
   seleccionarHistorial(){
-    console.debug('Historial seleccionado');
+    const select = document.getElementById('usuario');
+    console.debug(select.value);
+    var scope = this;
+    fetch('../pages/historial.html')
+    .then(r => r.text())
+    .then(html => {
+      document.querySelector('main').innerHTML = html;
+      window.uiHistorial = new InterfazHistorial();
+      
+      console.debug(this.usuario, this.token);
+      window.uiHistorial.mostrarPestana(select.value, this.token);
+      //window.uiHistorial.mostrarPestana(this.usuario, this.token);
+      
+    })
+    .catch(err => console.error('Error al cargar configuracion:', err));
+    // Tomar fecha del input
+    
   }
 
   seleccionarGraficar() {
-  console.debug('Graficar seleccionado');
     var scope = this;
+    const select = document.getElementById('usuario');
+    //console.debug(select.value);
     fetch('../pages/graficar.html')
     .then(r => r.text())
     .then(html => {
@@ -168,30 +190,12 @@ class InterfazBalance {
       document.querySelector('main').innerHTML = html;
       window.uiGrafico = new InterfazGrafico();
       console.debug(this.usuario, this.token);
-      window.uiGrafico.mostrarPestana(this.usuario, this.token);
+      //window.uiGrafico.mostrarPestana(this.usuario, this.token);
+      window.uiGrafico.mostrarPestana(select.value, this.token);
     })
     .catch(err => console.error('Error al cargar configuracion:', err));
     // Tomar fecha del input
     return true;
-    const inputFecha = document.getElementById('fecha');
-    const fecha = inputFecha ? inputFecha.value : '';
-
-    // Usuario seleccionado en el combo (si existe)
-    const selectUsuario = document.getElementById('usuario');
-    const usuarioID = selectUsuario && selectUsuario.value
-      ? selectUsuario.value
-      : this.usuario;  // fallback al usuario actual
-
-    // Armar parámetros para enviar al PHP
-    const params = new URLSearchParams({
-      fecha: fecha,
-      usuarioID: usuarioID,
-      token: this.token,
-      tipoUsuario: this.tipoUsuario
-    });
-
-    // IMPORTANTE: usar la misma ruta que usabas en el onclick: '../balance_grafica.php'
-    window.location.href = '../balance_grafica.php?' + params.toString();
   }
 
   Operation1(){
@@ -216,6 +220,12 @@ class InterfazBalance {
       this.seleccionarHistorial();
       return;
     }
+    const btnFilter = event.target.closest('.btn-filterbalance');
+    if (btnFilter) {
+      this.traerBalance();
+      return;
+    }
+    
   });
 
   // Cambios en el combo de usuario

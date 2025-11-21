@@ -156,17 +156,7 @@ class InterfazGrafico {
  asignarEventosBase() {
   // Clicks en toda la página; filtramos por clases
   document.addEventListener('click', (event) => {
-    const btnGraph = event.target.closest('.btn-graph');
-    if (btnGraph) {
-      this.seleccionarGraficar();
-      return;
-    }
-
-    const btnHist = event.target.closest('.btn-history');
-    if (btnHist) {
-      this.seleccionarHistorial();
-      return;
-    }
+    
   });
 
   // Cambios en el combo de usuario

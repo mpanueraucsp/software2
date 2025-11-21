@@ -47,7 +47,7 @@
          * @return listado de usuarios
         */
 
-        function mostrarUsuarios1(){
+        function mostrarUsuarios(){
             $db = Database::getInstance();
             $sql = "SELECT * FROM mostrarUsuarios()";
             $res = $db->query($sql);
@@ -71,7 +71,7 @@
          *
          * @return array Lista de usuarios con sus datos básicos.
          */
-        function mostrarUsuarios(){
+        function mostrarUsuarios1(){
             $db = Database::getInstance();
             
             // Consulta directa para traer usuarios ordenados por ID
@@ -110,15 +110,15 @@
 
             // Query de Inserción (INSERT) en PostgreSQL
             // Se asume estado = 1 (Activo) por defecto al crear
-            $sql = "INSERT INTO usuarios (nombre, usuario, contrasena, tipousuario_id, estado) 
+            $sql = "INSERT INTO usuarios (nombre, nombre_de_usuario, contrasena, perfilid, estado) 
                     VALUES ($1, $2, $3, $4, 1) 
-                    RETURNING usuario_id";
+                    RETURNING usuarioid";
             
             try {
                 $params = [
                     $nombre, 
                     $usuario, 
-                    $contrasena, 
+                    md5($contrasena), 
                     (int)$tipoUsuario
                 ];
 
@@ -126,7 +126,7 @@
                 $row = pg_fetch_assoc($res);
 
                 if ($row) {
-                    return array("success" => true, "id" => $row['usuario_id']);
+                    return array("success" => true, "id" => $row['usuarioid']);
                 } else {
                     return array("success" => false, "msg" => "No se devolvió ID al insertar");
                 }

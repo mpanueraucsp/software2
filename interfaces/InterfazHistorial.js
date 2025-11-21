@@ -77,7 +77,6 @@ class InterfazHistorial {
   */
     mostrarDatosHistorial(data){
       const tbody = document.querySelector(".history-table tbody");
-
       // Limpia el contenido actual
       tbody.innerHTML = "";
 
@@ -115,6 +114,9 @@ class InterfazHistorial {
       var oTotal = document.getElementById('text-total');
       console.debug(oTotal, total);
       oTotal.value = total;
+
+      var oMovimientos = document.getElementById('title-movimientos');
+      oMovimientos.innerHTML = data.lista.length+" MOVIMIENTOS";
     }
     formatearFechaYYYYMMDD(f) {
       const partes = f.split("-"); // [YYYY, MM, DD]
