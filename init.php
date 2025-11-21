@@ -1,4 +1,6 @@
 <?php
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json; charset=UTF-8");
 	$headers = apache_request_headers();
     if (array_key_exists('Authorization', $headers)) {
         $token = str_replace("Bearer ", "", $headers['Authorization']);
@@ -13,12 +15,27 @@
         if (file_exists($file)){
             include_once($file);
             $class = new $controlador();
-            if ($controlador=="gusuario"){
-                if ($funcion=="validarParametros"){
+            if ($controlador == "gusuario"){
+                
+                // FCU-001: Login
+                if ($funcion == "validarParametros"){
                     $result = $class->$funcion($_REQUEST["usuario"], $_REQUEST["contrasena"]);
                 }
-                if ($funcion=="mostrarUsuarios"){
+                
+                // FCU-002: Listar Usuarios
+                if ($funcion == "mostrarUsuarios"){
                     $result = $class->$funcion();
+                }
+
+                // FCU-003: Crear Usuario (Guardar en BD)
+                if ($funcion == "crearUsuario"){
+                    $result = $class->$funcion(
+                        $_REQUEST["nombre"], 
+                        $_REQUEST["usuario"], 
+                        $_REQUEST["contrasena"], 
+                        $_REQUEST["perfil"],     
+                        $_REQUEST["usuarioID"]   
+                    );
                 }
             }
             if ($controlador=="gconcepto"){

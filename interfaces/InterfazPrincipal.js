@@ -33,9 +33,31 @@
       case 'configuracion':
         this.seleccionarConfiguracion();
         break;
+      case 'cuentas':  
+        this.mostrarCuentas();
+        break;
       default:
         console.log("Página no reconocida:", page);
     }
+   }
+   mostrarCuentas() {
+      var scope = this;
+      // Carga el archivo HTML de la carpeta pages
+      fetch('../pages/cuentas.html') 
+      .then(r => r.text())
+      .then(html => {
+        // Inyecta el HTML en el <main>
+        document.querySelector('main').innerHTML = html;
+        
+        // Inicializa la lógica de Cuentas
+        // Asegúrate de que InterfazCuentas.js esté importado en inicio.html
+        window.uiCuentas = new InterfazCuentas();
+        window.uiCuentas.mostrarPestana(this.usuarioID, this.token);
+        
+        // Actualiza visualmente el menú lateral (pone la estrellita negra)
+        scope.activarSideBar("cuentas");
+      })
+      .catch(err => console.error('Error al cargar cuentas:', err));
    }
    seleccionarConfiguracion(){
       //console.debug("entro aqio");

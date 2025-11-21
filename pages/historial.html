@@ -1,0 +1,219 @@
+<style>
+/* --- CONTENEDOR GENERAL --- */
+.historial-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* --- TITULOS --- */
+.page-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.section-title {
+  text-align: center;
+  margin: 40px 0 10px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* --- FILTROS SUPERIORES --- */
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.date-filter,
+.select-filter {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-input-wrapper,
+.select-wrapper {
+  position: relative;
+}
+
+input[type="date"],
+select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  font-size: 15px;
+  width: 200px;
+}
+
+/* Icono X */
+.date-icon {
+  position: absolute;
+  right: 10px;
+  top: 9px;
+  cursor: pointer;
+}
+
+/* Flecha de select */
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  pointer-events: none;
+}
+
+/* Botón Atras */
+.btn-back {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid #000;
+  background: #eee;
+  cursor: pointer;
+}
+
+/* --- TARJETA DE TABLA --- */
+.table-card {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  overflow-x: auto;
+}
+
+/* --- TABLA --- */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.history-table thead tr {
+  background: #cfe3ef;
+  font-weight: bold;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 12px;
+  font-size: 15px;
+}
+
+.history-table tbody tr:nth-child(even) {
+  background: #f7f7f7;
+}
+
+/* --- INPUT MONTOS --- */
+.cell-amount {
+  width: 100px;
+  padding: 6px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+}
+
+.total-label {
+  font-weight: bold;
+  text-align: right;
+  padding-right: 15px;
+}
+
+.total-final {
+  background: #eef5ff;
+  font-weight: bold;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  input[type="date"],
+  select {
+    width: 100%;
+  }
+
+  .filters-row {
+    flex-direction: column;
+  }
+}
+</style>
+<div class="historial-container">
+
+    <h1 class="page-title">HISTORIAL</h1>
+  
+    <div class="filters-row">
+  
+      <!-- Filtro por fecha -->
+      <div class="date-filter">
+        <label>Fecha de inicio</label>
+        <div class="date-input-wrapper">
+          <input type="date" id="fecha-inicio" />
+        </div>
+      </div>
+  
+      <div class="date-filter">
+        <label>Fecha de fin</label>
+        <div class="date-input-wrapper">
+          <input type="date" id="fecha-fin" />
+        </div>
+      </div>
+  
+      <!-- Filtro tipo -->
+      <div class="select-filter">
+        <label>Filtrar:</label>
+        <div class="select-wrapper">
+          <select id="tipo-filtro">
+            <option value="todo">Todos</option>
+            <option value="ingresos">Ingresos</option>
+            <option value="gastos">Gastos</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+  
+      <button class="btn-filter">Filtrar</button>
+    </div>
+  
+    <h2 class="section-title">MOVIMIENTOS</h2>
+  
+    <div class="table-card">
+  
+      <table class="history-table">
+  
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Tipo</th>
+            <th>Usuario</th>
+            <th>Monto</th>
+          </tr>
+        </thead>
+  
+        <tbody>
+          <tr>
+            <td>p-0012</td>
+            <td>23/08/2025</td>
+            <td>Sueldo</td>
+            <td>Mensual</td>
+            <td>Padre</td>
+            <td>2000.00</td>
+          </tr>
+  
+        </tbody>
+  
+        <tfoot>
+          <tr>
+            <td colspan="5" class="total-label">TOTAL</td>
+            <td><input class="cell-amount total-final" id="text-total" value="6250" readonly/></td>
+          </tr>
+        </tfoot>
+  
+      </table>
+  
+    </div>
+  
+  </div>
+  
