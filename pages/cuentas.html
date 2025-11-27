@@ -1,16 +1,49 @@
+<!--
+  PCU001
+  Interfaz (Pages) - Cuentas (cuentas.html).
+  Propósito: pantalla para listar usuarios/cuentas, cambiar estado (visual) y crear un nuevo usuario.
+  Esta vista se apoya en:
+  - sidebar-loader.js  -> loadSidebar('cuentas') carga el componente Sidebar en #sidebar-container
+  - InterfazCuentas.js -> renderiza lista, cambia vista (lista/formulario) y guarda usuario (guardarUsuario)
+  - InterfazPrincipal.js (importado por navegación general)
+
+  IDs clave que usa InterfazCuentas:
+  - #lista-usuarios-container : contenedor donde se dibujan las tarjetas (renderizarLista)
+  - #view-list               : vista de listado (cambiarVista)
+  - #view-form               : vista de formulario (cambiarVista)
+  - #form-nuevo-usuario      : formulario (se resetea en cambiarVista)
+  - #txt-nombre, #txt-usuario, #sel-perfil, #txt-pass, #txt-pass-rep : inputs usados en guardarUsuario()
+-->
+
 <!doctype html>
 <html lang="es">
 <head>
+  <!-- PCU002: Metadatos y CSS base -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cuentas</title>
   <link rel="stylesheet" href="../style.css" />
-  
+
+  <!--
+    PCU003
+    Scripts necesarios:
+    - endpoint.js          : define la variable endpoint para consumo de API
+    - sidebar-loader.js    : inserta el sidebar HTML en #sidebar-container
+    - InterfazPrincipal.js : navegación general (según tu arquitectura)
+    - InterfazCuentas.js   : lógica específica de esta pantalla
+  -->
   <script src="../js/endpoint.js"></script>
   <script src="../js/sidebar-loader.js"></script>
   <script src="../interfaces/InterfazPrincipal.js"></script>
   <script src="../interfaces/InterfazCuentas.js"></script>
-  
+
+  <!--
+    PCU004
+    Inicialización:
+    - Carga el sidebar marcando "cuentas"
+    - Al DOMContentLoaded crea InterfazCuentas, obtiene usuarioID/token del localStorage
+      y ejecuta mostrarPestana() para cargar el listado.
+  -->
   <script>
     loadSidebar('cuentas');
     window.addEventListener('DOMContentLoaded', () => {
@@ -20,33 +53,39 @@
        window.uiCuentas.mostrarPestana(uid, token);
     });
   </script>
-  
+
+  <!--
+    PCU005
+    Estilos visuales específicos de la página:
+    - Cabecera de perfiles
+    - Tarjetas de cuentas/usuarios y toggles (Activar/Desactivar)
+    - Botón "Agregar nueva cuenta"
+    - Layout del formulario de creación
+    - Responsive para pantallas pequeñas
+  -->
   <style>
-    /* Estilos visuales específicos */
     .profiles-section { text-align: center; margin-bottom: 30px; padding-top: 10px; }
     .profiles-grid { display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap; }
     .profile-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
     .profile-item:hover { transform: scale(1.05); }
     .avatar-circle { width: 90px; height: 90px; border-radius: 50%; background: #e0e0e0; display: flex; justify-content: center; align-items: center; font-size: 35px; margin-bottom: 10px; }
-    
+
     .accounts-list-section { max-width: 850px; margin: 0 auto; }
     .account-card { background: #f9f9f9; border: 1px solid #eee; border-radius: 12px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .account-info { display: flex; align-items: center; gap: 12px; }
     .mini-avatar { width: 40px; height: 40px; border-radius: 50%; background: #d1d5db; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     .account-name { color: #555; font-weight: 500; }
-    
+
     .toggle-group { display: flex; gap: 15px; font-size: 14px; color: #444; }
     .toggle-option { display: flex; align-items: center; gap: 6px; cursor: pointer; opacity: 0.6; }
     .toggle-option.active { opacity: 1; font-weight: bold; color: #000; }
     .radio-circle { width: 14px; height: 14px; border: 2px solid #888; border-radius: 50%; position: relative; }
     .toggle-option.active .radio-circle { background: #222; border-color: #222; }
 
-    /* --- BOTÓN MEJORADO --- */
     .btn-container-right { display: flex; justify-content: flex-end; margin-top: 25px; }
-    
-    /* Estilo bonito para el botón agregar */
+
     .btn-agregar {
-      background: #111827; /* Negro suave */
+      background: #111827;
       color: #fff;
       padding: 12px 28px;
       border-radius: 10px;
@@ -66,13 +105,13 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
 
-    /* Formulario */
+    /* PCU006: Formulario (oculto por defecto, se muestra con cambiarVista('formulario')) */
     #view-form { display: none; max-width: 800px; margin: 0 auto; padding-top: 20px; }
     .form-layout { display: flex; gap: 40px; margin-top: 20px; }
     .form-avatar { flex: 0 0 150px; display: flex; flex-direction: column; align-items: center; }
     .avatar-upload { width: 140px; height: 140px; background: #d1d5db; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 50px; color: #555; margin-bottom: 10px; cursor: pointer; transition: background 0.2s;}
     .avatar-upload:hover { background: #c0c0c0; }
-    
+
     .form-fields { flex: 1; }
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #444; }
@@ -80,23 +119,25 @@
     .form-control:focus { border-color: #333; }
 
     .form-buttons { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; margin-top: 20px; }
-    
+
     .btn-cancelar { background: #e5e7eb; color: #374151; padding: 12px 30px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: background 0.2s; }
     .btn-cancelar:hover { background: #d1d5db; }
-    
+
     .btn-guardar { background: #d1d5db; color: #4b5563; padding: 12px 30px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
-    
+
     .empty-state { text-align: center; padding: 40px; color: #999; border: 2px dashed #eee; border-radius: 12px; margin-top: 20px; }
-    
-    /* Responsivo */
+
     @media (max-width: 600px) {
         .form-layout { flex-direction: column; align-items: center; }
         .form-fields { width: 100%; }
     }
   </style>
 </head>
+
 <body>
+  <!-- PCU007: Layout general (sidebar + contenido) -->
   <div class="layout">
+    <!-- PCU008: Sidebar inyectado dinámicamente por sidebar-loader.js -->
     <div id="sidebar-container"></div>
     <main class="main-content">
       
@@ -107,14 +148,31 @@
           <div id="grid-perfiles" class="profiles-grid"></div>
         </div>
 
+    <main class="main-content">
+      <!--
+        PCU009
+        Vista 1: Listado (por defecto visible)
+        - Muestra perfiles (grid-perfiles) y listado de cuentas (lista-usuarios-container)
+      -->
+      <div id="view-list">
+        <div class="profiles-section">
+          <h2 style="font-size: 20px; color: #333; margin-bottom: 5px;">Perfiles Disponibles</h2>
+          <p style="color: #888; font-size: 13px;">Selecciona el perfil que desees visualizar</p>
+
+          <!-- PCU010: Contenedor de perfiles (actualmente sin lógica poblada aquí) -->
+          <div id="grid-perfiles" class="profiles-grid"></div>
+        </div>
+
         <div style="border-top: 1px solid #f0f0f0; margin: 20px 0;"></div>
 
         <div class="accounts-list-section">
           <h3 style="font-size: 18px; margin-bottom: 5px;">Listado de Cuentas</h3>
           <p style="color: #999; font-size: 13px;">Todas las cuentas registradas (Activas y Desactivas).</p>
 
+          <!-- PCU011: Contenedor donde InterfazCuentas.renderizarLista dibuja las tarjetas -->
           <div id="lista-usuarios-container"></div>
 
+          <!-- PCU012: Botón para ir a vista formulario -->
           <div class="btn-container-right">
             <button class="btn-agregar" onclick="window.uiCuentas.cambiarVista('formulario')">
                Agregar nueva cuenta
@@ -123,26 +181,38 @@
         </div>
       </div>
 
+      <!--
+        PCU013
+        Vista 2: Formulario (oculta por defecto)
+        - Se muestra con window.uiCuentas.cambiarVista('formulario')
+        - Guarda usuario con window.uiCuentas.guardarUsuario()
+      -->
       <div id="view-form">
         <div style="text-align: center;">
             <h2 style="font-size: 20px; margin-bottom: 5px;">Creación de Nuevo Usuario</h2>
             <p style="color: #888; font-size: 14px;">Ingresa los datos del nuevo usuario.</p>
         </div>
+
         <div class="form-layout">
+            <!-- PCU014: Avatar placeholder (solo visual) -->
             <div class="form-avatar">
                 <div class="avatar-upload">👤</div>
                 <span style="color: #999; font-size: 13px;">Inserta Imagen</span>
             </div>
+
+            <!-- PCU015: Campos del formulario -->
             <div class="form-fields">
                 <form id="form-nuevo-usuario" onsubmit="event.preventDefault();">
                     <div class="form-group">
                         <label>Nombre</label>
                         <input type="text" id="txt-nombre" class="form-control" placeholder="Ej. Juan">
                     </div>
+
                     <div class="form-group">
                         <label>Usuario</label>
                         <input type="text" id="txt-usuario" class="form-control" placeholder="Ej. jperez">
                     </div>
+
                     <div class="form-group">
                         <label>Perfil del usuario</label>
                         <select id="sel-perfil" class="form-control">
@@ -151,15 +221,18 @@
                             <option value="3">Invitado</option>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>Contraseña</label>
                         <input type="password" id="txt-pass" class="form-control" placeholder="******">
                     </div>
+
                     <div class="form-group">
                         <label>Repita la contraseña</label>
                         <input type="password" id="txt-pass-rep" class="form-control" placeholder="******">
                     </div>
-                    
+
+                    <!-- PCU016: Botones del formulario -->
                     <div class="form-buttons">
                         <button class="btn-guardar" onclick="window.uiCuentas.guardarUsuario()">Guardar</button>
                         <button class="btn-cancelar" onclick="window.uiCuentas.cambiarVista('lista')">Cancelar</button>

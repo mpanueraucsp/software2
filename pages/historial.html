@@ -1,5 +1,17 @@
+<!--
+  PHI001
+  Interfaz (Pages) - Historial (historial.html).
+  Propósito: mostrar el historial de movimientos en una tabla y permitir filtrar por rango de fechas y tipo.
+  Esta vista normalmente es consumida por InterfazHistorial.js, que:
+  - Inicializa fechas (#fecha-inicio, #fecha-fin)
+  - Llama al backend (api/gbalance/traerHistorial)
+  - Renderiza filas en ".history-table tbody"
+  - Calcula total y lo coloca en #text-total
+  - Actualiza el contador en #title-movimientos
+-->
+
 <style>
-/* --- CONTENEDOR GENERAL --- */
+/* PHI002: Contenedor general */
 .historial-container {
   max-width: 1100px;
   margin: auto;
@@ -7,7 +19,7 @@
   font-family: Arial, sans-serif;
 }
 
-/* --- TITULOS --- */
+/* PHI003: Títulos */
 .page-title {
   font-size: 26px;
   font-weight: bold;
@@ -21,7 +33,7 @@
   font-weight: bold;
 }
 
-/* --- FILTROS SUPERIORES --- */
+/* PHI004: Filtros superiores (fecha inicio/fin + tipo + botón filtrar) */
 .filters-row {
   display: flex;
   flex-wrap: wrap;
@@ -50,7 +62,7 @@ select {
   width: 200px;
 }
 
-/* Icono X */
+/* PHI005: Icono X (está definido pero no se usa en el HTML actual) */
 .date-icon {
   position: absolute;
   right: 10px;
@@ -58,7 +70,7 @@ select {
   cursor: pointer;
 }
 
-/* Flecha de select */
+/* PHI006: Flecha del select (decorativa) */
 .select-arrow {
   position: absolute;
   right: 12px;
@@ -66,7 +78,7 @@ select {
   pointer-events: none;
 }
 
-/* Botón Atras */
+/* PHI007: Botón ATRÁS (clase definida pero el botón no existe en el HTML actual) */
 .btn-back {
   padding: 8px 20px;
   border-radius: 8px;
@@ -75,7 +87,7 @@ select {
   cursor: pointer;
 }
 
-/* --- TARJETA DE TABLA --- */
+/* PHI008: Tarjeta contenedora de tabla */
 .table-card {
   background: #ffffff;
   border-radius: 15px;
@@ -84,7 +96,7 @@ select {
   overflow-x: auto;
 }
 
-/* --- TABLA --- */
+/* PHI009: Tabla de historial */
 .history-table {
   width: 100%;
   border-collapse: collapse;
@@ -106,7 +118,7 @@ select {
   background: #f7f7f7;
 }
 
-/* --- INPUT MONTOS --- */
+/* PHI010: Input para montos (TOTAL) */
 .cell-amount {
   width: 100px;
   padding: 6px;
@@ -126,7 +138,7 @@ select {
   font-weight: bold;
 }
 
-/* --- RESPONSIVE --- */
+/* PHI011: Responsive */
 @media (max-width: 768px) {
   input[type="date"],
   select {
@@ -138,82 +150,95 @@ select {
   }
 }
 </style>
+
+<!-- PHI012: Contenido principal Historial -->
 <div class="historial-container">
 
-    <h1 class="page-title">HISTORIAL</h1>
-  
-    <div class="filters-row">
-  
-      <!-- Filtro por fecha -->
-      <div class="date-filter">
-        <label>Fecha de inicio</label>
-        <div class="date-input-wrapper">
-          <input type="date" id="fecha-inicio" />
-        </div>
+  <!-- PHI013: Título principal -->
+  <h1 class="page-title">HISTORIAL</h1>
+
+  <!-- PHI014: Barra de filtros (InterfazHistorial.js escucha el click en .btn-filter) -->
+  <div class="filters-row">
+
+    <!-- PHI015: Filtro por fecha de inicio -->
+    <div class="date-filter">
+      <label>Fecha de inicio</label>
+      <div class="date-input-wrapper">
+        <input type="date" id="fecha-inicio" />
       </div>
-  
-      <div class="date-filter">
-        <label>Fecha de fin</label>
-        <div class="date-input-wrapper">
-          <input type="date" id="fecha-fin" />
-        </div>
-      </div>
-  
-      <!-- Filtro tipo -->
-      <div class="select-filter">
-        <label>Filtrar:</label>
-        <div class="select-wrapper">
-          <select id="tipo-filtro">
-            <option value="todo">Todos</option>
-            <option value="ingresos">Ingresos</option>
-            <option value="gastos">Gastos</option>
-          </select>
-          <span class="select-arrow">▼</span>
-        </div>
-      </div>
-  
-      <button class="btn-filter">Filtrar</button>
     </div>
-  
-    <h2 class="section-title" id="title-movimientos">MOVIMIENTOS</h2>
-  
-    <div class="table-card">
-  
-      <table class="history-table">
-  
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Fecha</th>
-            <th>Concepto</th>
-            <th>Tipo</th>
-            <th>Usuario</th>
-            <th>Monto</th>
-          </tr>
-        </thead>
-  
-        <tbody>
-          <tr>
-            <td>p-0012</td>
-            <td>23/08/2025</td>
-            <td>Sueldo</td>
-            <td>Mensual</td>
-            <td>Padre</td>
-            <td>2000.00</td>
-          </tr>
-  
-        </tbody>
-  
-        <tfoot>
-          <tr>
-            <td colspan="5" class="total-label">TOTAL</td>
-            <td><input class="cell-amount total-final" id="text-total" value="6250" readonly/></td>
-          </tr>
-        </tfoot>
-  
-      </table>
-  
+
+    <!-- PHI016: Filtro por fecha de fin -->
+    <div class="date-filter">
+      <label>Fecha de fin</label>
+      <div class="date-input-wrapper">
+        <input type="date" id="fecha-fin" />
+      </div>
     </div>
-  
+
+    <!-- PHI017: Filtro por tipo (nota: el JS actual NO lo usa aún) -->
+    <div class="select-filter">
+      <label>Filtrar:</label>
+      <div class="select-wrapper">
+        <select id="tipo-filtro">
+          <option value="todo">Todos</option>
+          <option value="ingresos">Ingresos</option>
+          <option value="gastos">Gastos</option>
+        </select>
+        <span class="select-arrow">▼</span>
+      </div>
+    </div>
+
+    <!-- PHI018: Botón Filtrar -> dispara traerHistorial() en InterfazHistorial.js -->
+    <button class="btn-filter">Filtrar</button>
   </div>
-  
+
+  <!-- PHI019: Título dinámico de movimientos (JS actualiza cantidad) -->
+  <h2 class="section-title" id="title-movimientos">MOVIMIENTOS</h2>
+
+  <!-- PHI020: Tabla -->
+  <div class="table-card">
+    <table class="history-table">
+
+      <!-- PHI021: Encabezado -->
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Concepto</th>
+          <th>Tipo</th>
+          <th>Usuario</th>
+          <th>Monto</th>
+        </tr>
+      </thead>
+
+      <!--
+        PHI022: Cuerpo de la tabla
+        InterfazHistorial.js reemplaza este tbody con resultados reales (tr dinámicos).
+        La fila de ejemplo es solo maqueta.
+      -->
+      <tbody>
+        <tr>
+          <td>p-0012</td>
+          <td>23/08/2025</td>
+          <td>Sueldo</td>
+          <td>Mensual</td>
+          <td>Padre</td>
+          <td>2000.00</td>
+        </tr>
+      </tbody>
+
+      <!-- PHI023: Footer con TOTAL calculado por JS en #text-total -->
+      <tfoot>
+        <tr>
+          <td colspan="5" class="total-label">TOTAL</td>
+          <td>
+            <input class="cell-amount total-final" id="text-total" value="6250" readonly/>
+          </td>
+        </tr>
+      </tfoot>
+
+    </table>
+  </div>
+
+</div>

@@ -1,10 +1,21 @@
+<!-- ICS001
+     Interfaz - Componente Sidebar.
+     Propósito: mostrar el menú lateral de HomePlan y permitir la navegación entre secciones.
+     Notas:
+     - data-page identifica la vista/ sección que se activará mediante JavaScript (si aplica).
+     - Los href="javascript:;" son placeholders para navegación controlada por JS.
+-->
+
 <aside class="sidebar">
+  <!-- Encabezado del sidebar: logo + nombre de la app -->
   <div class="sidebar-header">
-    <span class="sidebar-logo">🏠</span>
-    <h1 class="sidebar-title">HomePlan</h1>
+    <span class="sidebar-logo">🏠</span> <!-- Ícono representativo de HomePlan -->
+    <h1 class="sidebar-title">HomePlan</h1> <!-- Nombre de la aplicación -->
   </div>
 
+  <!-- Navegación principal -->
   <nav class="sidebar-nav">
+    <!-- Inicio -->
     <a href="inicio.html" class="nav-item" data-page="inicio">
       <span class="nav-icon">☆</span>
       <div class="nav-content">
@@ -12,6 +23,7 @@
       </div>
     </a>
 
+    <!-- Ingreso diario -->
     <a href="javascript:;" class="nav-item" data-page="ingreso-diario">
       <span class="nav-icon">☆</span>
       <div class="nav-content">
@@ -20,6 +32,7 @@
       </div>
     </a>
 
+    <!-- Balance -->
     <a href="javascript:;" class="nav-item" data-page="balance">
       <span class="nav-icon">☆</span>
       <div class="nav-content">
@@ -28,6 +41,7 @@
       </div>
     </a>
 
+    <!-- Cuentas -->
     <a href="javascript:;" class="nav-item" data-page="cuentas">
       <span class="nav-icon">☆</span>
       <div class="nav-content">
@@ -36,6 +50,7 @@
       </div>
     </a>
 
+    <!-- Configuración -->
     <a href="javascript:;" class="nav-item" data-page="configuracion">
       <span class="nav-icon">☆</span>
       <div class="nav-content">
@@ -45,6 +60,7 @@
     </a>
   </nav>
 
+  <!-- Footer: salida -->
   <div class="sidebar-footer">
     <a href="login.html" class="nav-item">
       <span class="nav-icon">↪</span>

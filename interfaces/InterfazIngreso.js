@@ -1,38 +1,63 @@
+/**
+ * ICI001
+ * Interfaz - Clase InterfazIngreso.
+ * Propósito: gestionar la vista de "Ingreso diario":
+ * - Cargar conceptos según periodicidad y fecha
+ * - Separar conceptos en ingresos y gastos
+ * - Mostrar inputs para registrar montos por concepto
+ * - Enviar datos a backend (guardarDatos)
+ * - Consultar datos guardados (cargarDatosUsuario) para editar
+ * - Calcular totales (ingresos, gastos y balance del día)
+ * - Mostrar balance mensual/total desde backend
+ */
 class InterfazIngreso {
-  usuarioID;
-  token;
-  fecha;
+  usuarioID; // ID del usuario en sesión
+  token;     // Token de autenticación
+  fecha;     // Fecha seleccionada para trabajar registros diarios
+
+  /**
+   * ICI002
+   * Constructor: coloca fecha actual e inicializa eventos de la vista.
+   */
   constructor() {
     this.colocarFechaActual();
     this.asignarEventos();
   }
-  //FIC001
-  //Funcion que se encarga de mostrar la pestaña de configuracion
+
+  // ICI003
+  // mostrarPestana: inicializa la pestaña "Ingreso diario" con usuario y token.
+  // - Carga conceptos disponibles por periodicidad
+  // - Carga balance para mostrar resumen
   mostrarPestana(usuarioID, token){
     this.usuarioID = usuarioID;
     this.token = token;
     this.fecha = "";
     console.debug(usuarioID, token);
-    this.traerConceptos();
-    this.traerBalance();
+
+    this.traerConceptos(); // Carga conceptos por fecha/periodicidad
+    this.traerBalance();   // Carga balance (resumen)
   }
-  ingresos = [];
-  gastos = [];
-  //FIC002
-  //Funcion que se encarga de traer los conceptos
+
+  ingresos = []; // Lista de conceptos tipo ingreso (tipoconconcepto = 1)
+  gastos = [];   // Lista de conceptos tipo gasto (tipoconconcepto != 1)
+
+  // ICI004
+  // traerConceptos: consume el endpoint que retorna conceptos válidos para la fecha (periodicidad).
+  // Usa api/gconcepto/traerConceptoPorPeriodicidad con usuarioID, token y fecha.
   traerConceptos(){
     console.debug(this.usuarioID, this.token);
+
     var url = endpoint+`api/gconcepto/traerConceptoPorPeriodicidad/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
-    
     var scope = this;
+
     try {
       fetch(url)
       .then(resp => {
-        return resp.json(); 
+        return resp.json();
       })
       .then(data => {
         console.debug(data);
-        scope.mostrarConceptos(data);
+        scope.mostrarConceptos(data); // Separa conceptos y renderiza inputs
       })
       .catch(err => console.error("Error:", err));
 
@@ -41,100 +66,112 @@ class InterfazIngreso {
       alert('No se pudo conectar con el servidor.');
     }
   }
-  //FIC003
-  //Funcion que se encarga de mostrar los conceptos
+
+  // ICI005
+  // mostrarConceptos: separa los conceptos recibidos en ingresos y gastos y actualiza la UI.
+  // - Luego renderiza inputs y calcula totales.
   mostrarConceptos(data){
     this.ingresos = [];
     this.gastos = [];
+
     for (const item of data) {
       console.debug(item.tipoconcepto);
+
+      // Tipo 1 => ingreso; cualquier otro => gasto (según tu lógica)
       if (item.tipoconconcepto=="1"){
         console.debug("ingresos");
         this.ingresos.push(item);
-      }else{
+      } else {
         this.gastos.push(item);
       }
     }
-    
-    
+
     console.debug(this.ingresos);
     console.debug(this.gastos);
-    this.renderIngresos();
-    this.renderGastos();
-    this.calcularTotales();
+
+    this.renderIngresos();    // Dibuja lista de ingresos
+    this.renderGastos();      // Dibuja lista de gastos
+    this.calcularTotales();   // Totaliza valores actuales en inputs
   }
-  //FIC004
-  //Funcion que se encarga de 
-  // Inicializar fecha actual
+
+  // ICI006
+  // colocarFechaActual: inicializa el input de fecha con hoy y guarda this.fecha.
   colocarFechaActual() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('fecha').value = today;
     this.fecha = today;
   }
-  //FIC005
-  //Funcion que se encarga de actualizar
+
+  // ICI007
+  // clickActualizar: recolecta los montos ingresados y envía el payload hacia el backend (guardarDatos).
+  // - Lee todos los inputs numéricos (ingresos y gastos)
+  // - Construye payload { datos: [...] }
+  // - Envía por POST a api/gcuenta/enviarDatos con parámetro "datos" en querystring
+  // - Si success: muestra mensaje y refresca balance
   clickActualizar(e){
-    const usuarioID = this.usuarioID; // asumimos que estás dentro de una clase y tienes usuarioID definido
-    const fecha = document.getElementById('fecha').value; // obtiene la fecha del input date
-    
-    // buscar todos los inputs dentro de span.item-amount
+    const usuarioID = this.usuarioID;
+    const fecha = document.getElementById('fecha').value;
+
+    // Obtener todos los inputs number (ingresos y gastos)
     const inputs = document.querySelectorAll('input[type="number"]');
-    //const inputs = document.querySelectorAll('span.item-amount input[type="text"]');
-    
-    // construir el arreglo de datos
+
+    // Construir arreglo de registros (solo los que tengan monto != 0)
     const datos = Array.from(inputs).map(input => {
       console.debug(input);
-      const concepto_id = input.name; // el name del input
-      const monto = parseFloat(input.value) || 0; // convertir a número, o 0 si está vacío
+      const concepto_id = input.name;                      // conceptoid en el atributo name
+      const monto = parseFloat(input.value) || 0;          // monto numérico
       return {
         fecha: fecha,
         usuario_id: usuarioID,
         concepto_id: concepto_id,
         monto: monto
       };
-    }).filter(item => item.monto !== 0); // opcional: solo enviar los que tengan monto distinto de 0
+    }).filter(item => item.monto !== 0);
 
-    // armar el cuerpo JSON
+    // Payload final esperado por la función guardarDatos (jsonb)
     const payload = { datos: datos };
 
     console.log('Enviando:', payload);
 
-    //const base = 'http://localhost/software2/software2/api/gcuenta/enviarDatos/';
     var base = endpoint+`api/gcuenta/enviarDatos/`;
     const qs = new URLSearchParams();
-    qs.set('datos', JSON.stringify(payload)); // encodifica seguro
+    qs.set('datos', JSON.stringify(payload)); // Encodifica el JSON en querystring
 
     fetch(`${base}?${qs.toString()}`, {
-      method: 'POST',                // POST con parámetros en la URL
-      headers: { 'Accept': 'application/json' } // Content-Type no es necesario si no mandas body
+      method: 'POST',
+      headers: { 'Accept': 'application/json' }
     })
     .then(resp => resp.json())
     .then(data => {
         console.debug(data.success)
         if (data.success){
           this.mostrarMensaje("Los datos se guardaron satisfactoriamente");
-          this.traerBalance();
+          this.traerBalance(); // Refresca balance para reflejar cambios
         }
       })
     .catch(err => console.error('Error al enviar datos:', err));
   }
-  //FIC006
-  //Funcion que se encarga de mostrar mensajes
+
+  // ICI008
+  // mostrarMensaje: muestra un mensaje simple al usuario (alert).
   mostrarMensaje(mensaje){
     alert(mensaje);
   }
+
+  // ICI009
+  // traerBalance: consulta el balance del usuario al backend y actualiza la UI con mostrarBalance().
   traerBalance(){
     var url = endpoint+`api/gbalance/traerBalance/?usuarioID=${encodeURIComponent(this.usuarioID)}`;
-    
     var scope = this;
+
     try {
       fetch(url)
       .then(resp => {
-        return resp.json(); 
+        return resp.json();
       })
       .then(data => {
         console.debug(data);
-        this.mostrarBalance(data.lista);
+        this.mostrarBalance(data.lista); // Pinta los totales en pantalla
       })
       .catch(err => console.error("Error:", err));
 
@@ -143,37 +180,39 @@ class InterfazIngreso {
       alert('No se pudo conectar con el servidor.');
     }
   }
-  //FIC007
-  //Funcion que se encarga de mostrar el balance
-  mostrarBalance(lista){
-    //console.debug(lista);
-    const totalGeneral = document.getElementById('total-general'); // obtiene el elemento total general
-    totalGeneral.innerText = lista.total_mensual;
-    //totalGeneral.innerText = lista.total_general;
-    //console.debug(totalGeneral);
-  }
-  //FIC008
-  //Funcion que se encarga de asignar eventos
-  asignarEventos() {
 
+  // ICI010
+  // mostrarBalance: muestra el total mensual/total general en el componente #total-general.
+  // Nota: el código usa lista.total_mensual (según tu implementación).
+  mostrarBalance(lista){
+    const totalGeneral = document.getElementById('total-general');
+    totalGeneral.innerText = lista.total_mensual;
+  }
+
+  // ICI011
+  // asignarEventos: asigna eventos principales de la vista:
+  // - .btn-update => guardar/actualizar datos (clickActualizar)
+  // - .btn-edit   => cargar datos guardados del día (clickEditarRegistro)
+  asignarEventos() {
     const btn = document.querySelector('.btn-update');
     if (btn) {
-      // Usa función flecha para mantener el contexto del "this"
       btn.addEventListener('click', (e) => this.clickActualizar(e));
     } else {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }
+
     const btn1 = document.querySelector('.btn-edit');
     console.debug("entro a asignar eventos", btn1);
     if (btn1) {
-      // Usa función flecha para mantener el contexto del "this"
       btn1.addEventListener('click', (e) => this.clickEditarRegistro(e));
     } else {
       console.warn(" No se encontró el botón .btn-update en el DOM");
     }
   }
-  //FIC009
-  // Agregar ingreso cuando se ingresa un monto
+
+  // ICI012
+  // setupIngresoListener: listener alternativo (no usado por el flujo actual de inputs dinámicos).
+  // - Escucha cambios en #ingreso-monto para agregar a una lista "ingresos" (variables globales en este bloque).
   setupIngresoListener() {
     document.getElementById('ingreso-monto').addEventListener('change', function() {
       const concepto = document.getElementById('ingreso-concepto').value;
@@ -181,27 +220,26 @@ class InterfazIngreso {
 
       if (concepto && monto > 0) {
         const conceptoTexto = document.getElementById('ingreso-concepto').selectedOptions[0].text;
-        
+
         if (conceptoTexto !== 'Nuevo') {
           ingresos.push({ concepto: conceptoTexto, monto: monto });
-          
+
           // Limpiar campos
           document.getElementById('ingreso-concepto').value = '';
           this.value = '';
-          
+
           renderIngresos();
           calcularTotales();
         } else {
-          // Aquí iría la lógica para agregar un concepto nuevo
           alert('Funcionalidad de agregar concepto nuevo');
           this.value = '';
         }
       }
     });
   }
-  //FIC010
-  // Agregar ingreso cuando se ingresa un monto
-  // Agregar gasto cuando se ingresa un monto
+
+  // ICI013
+  // setupGastoListener: listener alternativo (no usado por el flujo actual de inputs dinámicos).
   setupGastoListener() {
     document.getElementById('gasto-monto').addEventListener('change', function() {
       const concepto = document.getElementById('gasto-concepto').value;
@@ -209,30 +247,30 @@ class InterfazIngreso {
 
       if (concepto && monto > 0) {
         const conceptoTexto = document.getElementById('gasto-concepto').selectedOptions[0].text;
-        
+
         if (conceptoTexto !== 'Nuevo') {
           gastos.push({ concepto: conceptoTexto, monto: monto });
-          
+
           // Limpiar campos
           document.getElementById('gasto-concepto').value = '';
           this.value = '';
-          
+
           renderGastos();
           calcularTotales();
         } else {
-          // Aquí iría la lógica para agregar un concepto nuevo
           alert('Funcionalidad de agregar concepto nuevo');
           this.value = '';
         }
       }
     });
   }
-  //FIC012
-  // Renderizar lista de ingresos
+
+  // ICI014
+  // renderIngresos: renderiza la lista de ingresos como inputs numéricos y agrega listeners de totalización.
   renderIngresos() {
     const list = document.getElementById('ingresos-list');
 
-    // Renderizar los inputs
+    // Genera HTML con inputs; name = conceptoid
     list.innerHTML = this.ingresos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
@@ -249,18 +287,18 @@ class InterfazIngreso {
       </div>
     `).join('');
 
-    // 🔹 Después de crear los inputs, agregar eventos para totalizar
+    // Agregar eventos input para recalcular totales en tiempo real
     const inputs = list.querySelectorAll('.input-ingreso');
     inputs.forEach(input => {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
-  //FIC013
-  // Renderizar lista de gastos
+
+  // ICI015
+  // renderGastos: renderiza la lista de gastos como inputs numéricos y agrega listeners de totalización.
   renderGastos() {
     const list = document.getElementById('gastos-list');
 
-    // Renderizar los inputs
     list.innerHTML = this.gastos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
@@ -277,14 +315,19 @@ class InterfazIngreso {
       </div>
     `).join('');
 
-    // 🔹 Después de crear los inputs, agregar eventos para totalizar
+    // Agregar eventos input para recalcular totales en tiempo real
     const inputs = list.querySelectorAll('.input-gastos');
     inputs.forEach(input => {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
-  //FIC014
-  // Calcular todos los totales
+
+  // ICI016
+  // calcularTotales: suma ingresos y gastos desde los inputs actuales y actualiza la UI.
+  // - totalIngresos = suma de .input-ingreso
+  // - totalGastos   = suma de .input-gastos
+  // - totalGeneral  = ingresos - gastos
+  // Actualiza: #total-ingresos, #total-gastos y #gasto-hoy
   calcularTotales() {
     const inputs = document.querySelectorAll('.input-ingreso');
     var total = 0;
@@ -296,43 +339,38 @@ class InterfazIngreso {
     });
 
     const gastos = document.querySelectorAll('.input-gastos');
-
     gastos.forEach(inp => {
       const val = parseFloat(inp.value);
       if (!isNaN(val)) totalGastos += val;
     });
 
-    // Mostrar el total con dos decimales
-    //document.getElementById('total-ingresos').textContent = total.toFixed(2);
     const totalIngresos = total;
-    //const totalGastos = this.gastos.reduce((sum, item) => sum + item.monto, 0);
-    //const totalGastos = totalGastos;
     const totalGeneral = totalIngresos - totalGastos;
-    //console.debug(document.getElementById('total-ingresos'), totalIngresos.toFixed(2));
+
     document.getElementById('total-ingresos').textContent = totalIngresos.toFixed(2);
     document.getElementById('total-gastos').textContent = totalGastos.toFixed(2);
-    //document.getElementById('total-ingresos').textContent = "";
-    //document.getElementById('total-gastos').textContent = "";
     document.getElementById('gasto-hoy').textContent = totalGeneral.toFixed(2)||0.00;
-    //document.getElementById('total-general').textContent = totalGeneral.toFixed(2);
-    //document.getElementById('gasto-hoy').textContent = "0.00";
-    //document.getElementById('total-general').textContent = "0.00";
   }
-  //FIC015
-  // Editar
+
+  // ICI017
+  // clickEditarRegistro: consulta los montos guardados del usuario para la fecha seleccionada
+  // y vuelve a renderizar la vista con mostrarCuenta().
   clickEditarRegistro() {
     const fecha = document.getElementById('fecha').value;
     console.debug(this.usuarioID, this.token);
+
+    // Endpoint que retorna conceptos con monto cargado (obtenerCuentaUsuario)
     var url = endpoint+`api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(fecha)}`;
     var scope = this;
+
     try {
       fetch(url)
       .then(resp => {
-        return resp.json(); 
+        return resp.json();
       })
       .then(data => {
         console.debug(data);
-        scope.mostrarCuenta(data);
+        scope.mostrarCuenta(data); // Renderiza conceptos con montos existentes
       })
       .catch(err => console.error("Error:", err));
 
@@ -340,13 +378,16 @@ class InterfazIngreso {
       console.error('Error:', error);
       alert('No se pudo conectar con el servidor.');
     }
-
   }
+
+  // ICI018
+  // mostrarCuenta: reutiliza mostrarConceptos() para pintar conceptos con montos devueltos.
   mostrarCuenta(lista){
     this.mostrarConceptos(lista)
   }
 
-  // Guardar/Actualizar datos
+  // ICI019
+  // actualizarDatos: función placeholder (no integrada al flujo actual).
   actualizarDatos() {
     const fecha = document.getElementById('fecha').value;
     const datos = {
@@ -354,47 +395,24 @@ class InterfazIngreso {
       ingresos: ingresos,
       gastos: gastos
     };
-    
-    // Aquí irá la llamada a tu API PHP
-    // fetch('../api/guardar-datos.php', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(datos)
-    // })
-    //   .then(response => response.json())
-    //   .then(result => {
-    //     alert('Datos guardados correctamente');
-    //   });
-    
+
     alert('Guardar datos en la base de datos');
     console.log('Datos a guardar:', datos);
   }
 
-  // Cargar conceptos desde la base de datos
+  // ICI020
+  // cargarConceptos: función placeholder (no integrada al flujo actual).
   cargarConceptos() {
-    // Aquí irá la llamada a tu API PHP para obtener los conceptos
-    // fetch('../api/obtener-conceptos.php')
-    //   .then(response => response.json())
-    //   .then(conceptos => {
-    //     const selectIngresos = document.getElementById('ingreso-concepto');
-    //     const selectGastos = document.getElementById('gasto-concepto');
-    //     
-    //     conceptos.forEach(concepto => {
-    //       const option = `<option value="${concepto.id}">${concepto.nombre}</option>`;
-    //       selectIngresos.innerHTML += option;
-    //       selectGastos.innerHTML += option;
-    //     });
-    //   });
-    
     console.log('Cargar conceptos desde BD');
   }
 
-  // Inicializar la página
+  // ICI021
+  // init: función placeholder; referencia funciones globales (no métodos this.*).
   init() {
     inicializarFecha();
     setupIngresoListener();
     setupGastoListener();
     cargarConceptos();
   }
-    
+
 }

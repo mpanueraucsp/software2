@@ -1,15 +1,35 @@
+<!--
+  PLO001
+  Interfaz (Pages) - Login (login.html).
+  Propósito: mostrar el formulario de autenticación y delegar la validación de credenciales a InterfazLogin.js.
+  Flujo general:
+  - Carga endpoint.js (URL base del backend)
+  - Carga InterfazLogin.js (maneja submit del formulario #formLogin)
+  - Si login es correcto, InterfazLogin crea InterfazPrincipal y redirige a inicio.html
+-->
+
 <!doctype html>
 <html lang="es">
 <head>
+  <!-- PLO002: Metadatos y título -->
   <title>Login - Sistema de Planificación</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PLO003: Estilos globales del sistema -->
   <link rel="stylesheet" href="../style.css">
+
+  <!-- PLO004: Endpoint del backend (variable endpoint) -->
   <script src="../js/endpoint.js"></script>
-  
+
+  <!-- PLO005: Interfaz principal (se usa luego de autenticar para cargar el “shell”) -->
   <script src="../interfaces/InterfazPrincipal.js"></script>
+
+  <!-- PLO006: Interfaz de Login (maneja el submit y llama al API de usuario) -->
   <script src="../interfaces/InterfazLogin.js"></script>
+
   <style>
+    /* PLO007: Centrado vertical/horizontal del formulario de login */
     body {
       min-height: 100svh;
       display: grid;
@@ -17,10 +37,12 @@
       padding: 24px;
     }
 
+    /* PLO008: Ancho máximo del contenedor */
     .wrap {
       width: min(520px, 92vw);
     }
 
+    /* PLO009: Estilo del título */
     .title {
       text-align: center;
       letter-spacing: .5px;
@@ -28,6 +50,7 @@
       margin: 0 0 18px 0;
     }
 
+    /* PLO010: Separación del área de acciones (botón) */
     .actions {
       margin-top: 8px;
     }
@@ -36,6 +59,7 @@
       margin-top: 12px;
     }
 
+    /* PLO011: Ajustes responsive */
     @media (max-width:420px) {
       .title {
         font-size: 16px;
@@ -43,11 +67,17 @@
     }
   </style>
 </head>
+
 <body>
   <main class="wrap">
+    <!-- PLO012: Encabezado del sistema -->
     <h2 class="title">SISTEMA DE PLANIFICACION DE ECONOMIA FAMILIAR</h2>
 
-     <form id="formLogin" class="card" action="#" method="post" autocomplete="off">
+    <!-- PLO013: Formulario Login
+         - id="formLogin" es usado por InterfazLogin.js para capturar el submit
+         - inputs: #user y #pass son leídos por InterfazLogin.js
+    -->
+    <form id="formLogin" class="card" action="#" method="post" autocomplete="off">
       <div class="control">
         <label for="user">Usuario</label>
         <input id="user" name="usuario" type="text" placeholder="Value" required />
@@ -63,9 +93,16 @@
       </div>
     </form>
   </main>
+
   <script>
+    /*
+      PLO014
+      Inicialización: al cargar el DOM se crea InterfazLogin, que:
+      - Vincula el evento submit del formulario #formLogin
+      - Llama al endpoint api/gusuario/validarParametros (según tu JS)
+      - Si credenciales son correctas, navega a inicio.html
+    */
     window.addEventListener('DOMContentLoaded', () => new InterfazLogin());
   </script>
 </body>
 </html>
-    

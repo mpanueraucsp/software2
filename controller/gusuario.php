@@ -1,38 +1,63 @@
 <?php
     require_once 'database.php';
-    /**
-         * G-001 Controlador GUsuario se encarga de la gestion de los usuarios
-    **/
-    class GUsuario {
-        public $usuario;
-        public $contrasena;
-        /**
-         * FCU001
-         * encarga de validar si el usuario existe en la base de datos
-         *
-         * @param usuario 
-         * @param contraseña
-         * @return valido=true, si el concepto es valido, y guardarOk=true, si se guardo.
-        */
 
+    /**
+     * CGU001
+     * Controlador - GUsuario (gusuario.php).
+     * Propósito: gestionar operaciones de usuarios:
+     * - Validar credenciales (login)
+     * - Listar usuarios
+     * - Crear usuarios
+     *
+     * Dependencias:
+     * - Database (Singleton)
+     * - Funciones de BD: verificarUsuario, mostrarUsuarios
+     * - Operaciones directas: INSERT en tabla usuarios (crearUsuario)
+     **/
+    class GUsuario {
+        public $usuario;      // Username ingresado por el usuario
+        public $contrasena;   // Contraseña ingresada (texto plano antes de aplicar hash en BD)
+
+        /**
+         * CGU002
+         * Controlador - Usuario (Login).
+         * Se encarga de validar si el usuario existe en la base de datos mediante la función verificarUsuario.
+         *
+         * Flujo:
+         * 1) Guarda usuario y contraseña en el controlador (this)
+         * 2) Llama a la función SQL verificarUsuario(usuario, contrasena)
+         * 3) Si cuentaExiste = true, retorna usuarioID y tipoUsuario
+         * 4) Si no, retorna valores nulos
+         *
+         * @param string $usuario Nombre de usuario (login).
+         * @param string $contrasena Contraseña (texto plano; la función SQL aplica md5).
+         * @return array Respuesta con cuentaExiste, usuarioID y tipoUsuario.
+         */
         function validarParametros($usuario, $contrasena){
+            // Guardar parámetros en el controlador
             $this->usuario = $usuario;
             $this->contrasena = $contrasena;
-            
+
+            // Obtener instancia BD (Singleton)
             $db = Database::getInstance();
+
+            // Llamada a función SQL de autenticación
             $sql = "SELECT * FROM verificarUsuario($1, $2)";
             $params = [ $this->usuario, $this->contrasena ];
 
+            // Ejecutar consulta parametrizada
             $res = $db->queryParams($sql, $params);
             $row = pg_fetch_assoc($res);
 
+            // Interpretar respuesta: cuenta existe y está activa
             if ($row && $row["cuentaexiste"] === 't') {
                 return array(
-                    "cuentaExiste" => true,
-                    "usuarioID" => (int)$row["usuarioid"],
-                    "tipoUsuario" => $row["tipousuario"]
+                    "cuentaExiste" => true,                 // Login correcto
+                    "usuarioID" => (int)$row["usuarioid"],  // ID del usuario
+                    "tipoUsuario" => $row["tipousuario"]    // Perfil/rol
                 );
             } else {
+                // Login inválido
                 return array(
                     "cuentaExiste" => false,
                     "usuarioID" => null,
@@ -40,97 +65,129 @@
                 );
             }
         }
-        /**
-         * FCU002
-         * encarga de mostrar los usuarios
-         *
-         * @return listado de usuarios
-        */
 
+        /**
+         * CGU003
+         * Controlador - Usuario (Listar usuarios).
+         * Se encarga de mostrar el listado de usuarios activos con su perfil, usando la función mostrarUsuarios().
+         *
+         * Flujo:
+         * 1) Ejecuta SELECT * FROM mostrarUsuarios()
+         * 2) Recorre el resultset y arma un arreglo con los campos requeridos
+         *
+         * @return array Listado de usuarios (usuarioID, nombre, nombre_de_usuario, perfil).
+         */
         function mostrarUsuarios(){
+            // Obtener instancia BD
             $db = Database::getInstance();
+
+            // Llamada a función SQL de listado
             $sql = "SELECT * FROM mostrarUsuarios()";
             $res = $db->query($sql);
+
+            // Armar arreglo de respuesta para la interfaz
             $usuarios = array();
             while ($row = pg_fetch_assoc($res)) {
                 $usuarios[] = array(
-                    "usuarioID" => (int)$row["usuarioid"],
-                    "nombre" => $row["nombre"],
-                    "nombre_de_usuario" => $row["nombre_de_usuario"],
-                    "perfil" => $row["perfil"]
+                    "usuarioID" => (int)$row["usuarioid"],          // ID usuario
+                    "nombre" => $row["nombre"],                     // Nombre completo
+                    "nombre_de_usuario" => $row["nombre_de_usuario"],// Username
+                    "perfil" => $row["perfil"]                      // Nombre del perfil
                 );
             }
-            // Puedes devolver el array directamente
+
             return $usuarios;
         }
 
-        
         /**
-         * FCU-002
-         * Se encarga de obtener el listado completo de usuarios registrados.
+         * CGU004
+         * Controlador - Usuario (Listar usuarios - consulta directa).
+         * Se encarga de obtener el listado completo de usuarios registrados mediante una consulta directa a la tabla.
+         *
+         * Nota:
+         * - Este método no usa la función mostrarUsuarios().
+         * - OJO: los nombres de columna aquí (usuario_id, usuario, tipousuario_id) deben existir tal cual en tu BD,
+         *   si no, este método podría ser de una versión antigua del esquema.
          *
          * @return array Lista de usuarios con sus datos básicos.
          */
         function mostrarUsuarios1(){
+            // Obtener instancia BD
             $db = Database::getInstance();
-            
-            // Consulta directa para traer usuarios ordenados por ID
+
+            // Consulta directa (tabla usuarios)
             $sql = "SELECT usuario_id, nombre, usuario, tipousuario_id as perfil, estado 
                     FROM usuarios 
-                    ORDER BY usuario_id ASC"; 
-            
+                    ORDER BY usuario_id ASC";
+
             $res = $db->query($sql);
+
+            // Armar arreglo de respuesta
             $usuarios = array();
-            
             while ($row = pg_fetch_assoc($res)) {
                 $usuarios[] = array(
-                    "usuarioID" => (int)$row["usuario_id"],
-                    "nombre" => $row["nombre"],
-                    "usuario" => $row["usuario"],
-                    "perfil" => $row["perfil"], // ID del perfil (1, 2, 3)
-                    "estado" => $row["estado"]  // 1=Activo, 0=Inactivo
+                    "usuarioID" => (int)$row["usuario_id"], // ID usuario
+                    "nombre" => $row["nombre"],             // Nombre
+                    "usuario" => $row["usuario"],           // Username (columna alternativa)
+                    "perfil" => $row["perfil"],             // ID del perfil
+                    "estado" => $row["estado"]              // Estado (1=Activo, 0=Inactivo)
                 );
             }
+
             return $usuarios;
         }
 
         /**
-         * FCU-003
-         * Se encarga de insertar un nuevo registro de usuario en la base de datos.
+         * CGU005
+         * Controlador - Usuario (Crear usuario).
+         * Se encarga de insertar un nuevo usuario en la base de datos.
          *
-         * @param string $nombre Nombre completo de la persona.
-         * @param string $usuario Nombre de usuario para login.
-         * @param string $contrasena Contraseña.
-         * @param int $tipoUsuario ID del perfil (1:Admin, 2:Miembro, etc).
-         * @param int $usuarioID_creador (Opcional) ID de quien realiza la acción (para logs).
-         * @return array Resultado de la operación (success: bool, id: int).
+         * Flujo:
+         * 1) Prepara INSERT parametrizado para evitar SQL Injection
+         * 2) Aplica md5 a la contraseña antes de almacenar
+         * 3) Inserta con estado = 1 por defecto
+         * 4) Retorna el usuarioid generado (RETURNING usuarioid)
+         *
+         * Nota:
+         * - $usuarioID_creador llega como parámetro pero aquí no se usa (podría servir para auditoría/logs).
+         *
+         * @param string $nombre Nombre completo.
+         * @param string $usuario Username para login.
+         * @param string $contrasena Contraseña en texto plano (se convierte a md5).
+         * @param int $tipoUsuario ID del perfil (perfilid).
+         * @param int $usuarioID_creador ID de quien crea (no usado en este método).
+         * @return array Resultado (success bool, id o msg).
          */
         function crearUsuario($nombre, $usuario, $contrasena, $tipoUsuario, $usuarioID_creador){
+            // Obtener instancia BD
             $db = Database::getInstance();
 
-            // Query de Inserción (INSERT) en PostgreSQL
-            // Se asume estado = 1 (Activo) por defecto al crear
+            // Inserción en tabla usuarios con retorno de ID
             $sql = "INSERT INTO usuarios (nombre, nombre_de_usuario, contrasena, perfilid, estado) 
                     VALUES ($1, $2, $3, $4, 1) 
                     RETURNING usuarioid";
-            
+
             try {
+                // Parámetros del INSERT (md5 para contraseña)
                 $params = [
-                    $nombre, 
-                    $usuario, 
-                    md5($contrasena), 
+                    $nombre,
+                    $usuario,
+                    md5($contrasena),
                     (int)$tipoUsuario
                 ];
 
+                // Ejecutar inserción parametrizada
                 $res = $db->queryParams($sql, $params);
                 $row = pg_fetch_assoc($res);
 
+                // Validar retorno de ID
                 if ($row) {
                     return array("success" => true, "id" => $row['usuarioid']);
                 } else {
                     return array("success" => false, "msg" => "No se devolvió ID al insertar");
                 }
             } catch (Exception $e) {
+                // Manejo de error de BD
                 return array("success" => false, "msg" => "Error BD: " . $e->getMessage());
             }
         }

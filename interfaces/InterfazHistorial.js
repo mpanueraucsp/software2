@@ -1,24 +1,43 @@
+/**
+ * ICH001
+ * Interfaz - Clase InterfazHistorial.
+ * Propósito: gestionar la vista de Historial:
+ * - Colocar rango de fechas por defecto (inicio de mes → hoy)
+ * - Consultar historial al backend (por usuario y rango)
+ * - Renderizar tabla de movimientos y total acumulado
+ */
 class InterfazHistorial {
-  token;
-  tipoUsuario;
-  usuario;
+  token;       // Token de autenticación
+  tipoUsuario; // Rol/perfil del usuario
+  usuario;     // Usuario seleccionado / usuario actual
+
+  /**
+   * ICH002
+   * Constructor: inicializa la interfaz y asigna eventos base.
+   */
   constructor() {
     this.asignarEventosBase();
   }
+
   /*
-    FIG001
-    Mostrar la pestana de Grafico;
+    ICH003
+    mostrarPestana: inicializa la pestaña de Historial con usuario/token/tipoUsuario.
+    - Coloca fechas por defecto
+    - Trae el historial con el rango inicial
   */
   mostrarPestana(usuario, token, tipoUsuario){
-    this.token = token;
-    this.tipoUsuario = tipoUsuario;
-    this.usuario = usuario;
-    this.colocarFechaActual();
-    this.traerHistorial();
+    this.token = token;              // Guarda token
+    this.tipoUsuario = tipoUsuario;  // Guarda rol
+    this.usuario = usuario;          // Guarda usuario objetivo
+    this.colocarFechaActual();       // Setea rango de fechas por defecto
+    this.traerHistorial();           // Consulta historial al backend
   }
+
   /*
-    FIG002
-    coloca la fecha actual en el campo fecha;
+    ICH004
+    colocarFechaActual: llena los inputs de fechas (inicio y fin) con:
+    - fecha-inicio = primer día del mes actual
+    - fecha-fin    = hoy
   */
   colocarFechaActual(){
     const inputFechaInicio = document.getElementById('fecha-inicio');
@@ -29,40 +48,49 @@ class InterfazHistorial {
     // Obtener fecha actual
     const hoy = new Date();
 
-    // Primer día del mes actual → día 1
+    // Primer día del mes actual (YYYY-MM-DD)
     const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
       .toISOString()
       .split('T')[0];
 
-    // Fecha de hoy formateada YYYY-MM-DD
+    // Fecha de hoy (YYYY-MM-DD)
     const hoyFormateado = hoy.toISOString().split('T')[0];
 
-    // Asignar valores
+    // Asignar valores por defecto
     inputFechaInicio.value = primerDiaMes;
     inputFechaFin.value = hoyFormateado;
   }
+
   /*
-    FIH003
-    Traer el historial
+    ICH005
+    traerHistorial: consulta al backend el historial de movimientos según:
+    - usuarioID (this.usuario)
+    - fechainicio (#fecha-inicio)
+    - fechafin    (#fecha-fin)
+    Al recibir la respuesta, renderiza la tabla.
   */
-    traerHistorial(){
+  traerHistorial(){
       var scope = this;
+
       console.debug(this.usuario);
+
+      // Tomar fechas del DOM
       var ofechainicio = document.getElementById('fecha-inicio');
       var ofechafin = document.getElementById('fecha-fin');
       var fechainicio = ofechainicio.value;
       var fechafin = ofechafin.value;
+
+      // Endpoint API: gbalance/traerHistorial
       var url = endpoint+`api/gbalance/traerHistorial/?token=${encodeURIComponent(this.token)}&usuarioID=${encodeURIComponent(this.usuario)}&fechainicio=${encodeURIComponent(fechainicio)}&fechafin=${encodeURIComponent(fechafin)}`;
-      var scope = this;
+
       try {
         fetch(url)
         .then(resp => {
-          return resp.json(); 
+          return resp.json();
         })
         .then(lista => {
           console.debug(lista);
-          scope.mostrarDatosHistorial(lista);
-          //scope.llenarComboUsuarios(lista);
+          scope.mostrarDatosHistorial(lista); // Renderiza tabla y totales
         })
         .catch(err => console.error("Error:", err));
 
@@ -70,13 +98,18 @@ class InterfazHistorial {
         console.error('Error:', error);
         alert('No se pudo conectar con el servidor.');
       }
-    }
+  }
+
   /*
-    FIH004
-    Traer el historial
+    ICH006
+    mostrarDatosHistorial: renderiza la tabla del historial usando data.lista.
+    - Si no hay resultados, muestra "Sin resultados"
+    - Calcula total acumulado (tipoConcepto * monto)
+    - Actualiza #text-total y #title-movimientos
   */
-    mostrarDatosHistorial(data){
+  mostrarDatosHistorial(data){
       const tbody = document.querySelector(".history-table tbody");
+
       // Limpia el contenido actual
       tbody.innerHTML = "";
 
@@ -87,17 +120,20 @@ class InterfazHistorial {
         `;
         return;
       }
+
       var total = 0.00;
+
       data.lista.forEach(item => {
-        
             // Formateo de fecha a DD/MM/YYYY
             const fecha = this.formatearFechaYYYYMMDD(item.fecha);
 
-            // Convertir periodicidad (si en tu BD es 1,2,3…)
-            const periodicidadTexto = this.convertirPeriodicidad(item.periodicidad);
+            // Conversión de tipo (Ingreso/Gasto)
             const tipoTexto = this.convertirTipo(item.tipoconconcepto);
-            total+=item.tipoconconcepto*item.monto;
-            // Crear fila
+
+            // Acumula total (ingreso suma, gasto resta)
+            total += item.tipoconconcepto * item.monto;
+
+            // Crear fila de tabla
             const tr = document.createElement("tr");
 
             tr.innerHTML = `
@@ -111,18 +147,32 @@ class InterfazHistorial {
 
         tbody.appendChild(tr);
       });
+
+      // Actualizar total en input #text-total
       var oTotal = document.getElementById('text-total');
       console.debug(oTotal, total);
       oTotal.value = total;
 
+      // Actualizar contador de movimientos en el título
       var oMovimientos = document.getElementById('title-movimientos');
       oMovimientos.innerHTML = data.lista.length+" MOVIMIENTOS";
-    }
-    formatearFechaYYYYMMDD(f) {
+  }
+
+  /*
+    ICH007
+    formatearFechaYYYYMMDD: convierte YYYY-MM-DD a DD/MM/YYYY.
+  */
+  formatearFechaYYYYMMDD(f) {
       const partes = f.split("-"); // [YYYY, MM, DD]
       return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-    convertirPeriodicidad(valor) {
+  }
+
+  /*
+    ICH008
+    convertirPeriodicidad: convierte un código de periodicidad a texto.
+    Nota: actualmente no se utiliza en el render (se mantiene por utilidad).
+  */
+  convertirPeriodicidad(valor) {
       switch (valor) {
         case "1": return "Diario";
         case "2": return "Semanal";
@@ -130,30 +180,42 @@ class InterfazHistorial {
         case "4": return "Anual";
         default: return "Sin definir";
       }
-    }
-    convertirTipo(valor) {
+  }
+
+  /*
+    ICH009
+    convertirTipo: convierte tipoconconcepto (1 / -1) a texto (Ingreso / Gasto).
+  */
+  convertirTipo(valor) {
       switch (valor) {
         case "1": return "Ingreso";
         case "-1": return "Gasto";
         default: return "Sin definir";
       }
-    }
- asignarEventosBase() {
-  // Clicks en toda la página; filtramos por clases
-  document.addEventListener('click', (event) => {
-    const btnHist = event.target.closest('.btn-filter');
-    if (btnHist) {
-      this.traerHistorial();
-      return;
-    }
-  });
+  }
 
-  // Cambios en el combo de usuario
-  document.addEventListener('change', (event) => {
-    if (event.target.id === 'usuario') {
-      this.seleccionarUsuario();
-    }
-  });
-}
+  /*
+    ICH010
+    asignarEventosBase: asigna listeners globales:
+    - Click en .btn-filter: vuelve a consultar historial con el rango actual
+    - Change en #usuario: llama a seleccionarUsuario() (nota: no está definido aquí)
+  */
+  asignarEventosBase() {
+    // Clicks en toda la página; filtramos por clases
+    document.addEventListener('click', (event) => {
+      const btnHist = event.target.closest('.btn-filter');
+      if (btnHist) {
+        this.traerHistorial(); // Refresca historial con filtros actuales
+        return;
+      }
+    });
+
+    // Cambios en el combo de usuario
+    document.addEventListener('change', (event) => {
+      if (event.target.id === 'usuario') {
+        this.seleccionarUsuario(); // Nota: este método no está definido en este archivo
+      }
+    });
+  }
 
 }
