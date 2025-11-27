@@ -1,9 +1,27 @@
+<!--
+  PBA001
+  Interfaz (Pages) - Balance (balance.html).
+  Propósito: estructura visual de la pantalla Balance:
+  - Filtros por fecha (#fecha) y usuario (#usuario)
+  - Botón de filtrar (.btn-filterbalance) que dispara la recarga de datos (JS)
+  - Botones de acciones: Graficar (.btn-graph) e Historial (.btn-history)
+  - Contenedores donde la InterfazBalance inyecta datos:
+      * #ingresos-list, #total-ingresos
+      * #gastos-list,   #total-gastos
+      * #todos-anos (anual), #mensual (mensual)
+  Nota: esta página es consumida por InterfazPrincipal -> mostrarBalance() e InterfazBalance.
+-->
+
 <div class="layout">
 
   <main class="main-content">
+    <!-- PBA002: Título de la pantalla (puede actualizarse según el usuario seleccionado) -->
     <h1 class="page-title">Balance - Yo</h1>
 
+    <!-- PBA003: Sección de filtros y acciones (fecha, usuario, filtrar, graficar, historial) -->
     <div class="filters-section" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      
+      <!-- PBA004: Filtro por fecha (input #fecha usado por InterfazBalance para consultar datos al backend) -->
       <div class="date-filter" style="min-width: 240px;">
         <div class="date-control">
           <label>Filtrar por Fecha</label>
@@ -15,6 +33,7 @@
         </div>
       </div>
 
+      <!-- PBA005: Filtro por usuario (select #usuario se llena dinámicamente si es ADMINISTRADOR) -->
       <div class="filter-group" style="min-width: 220px;">
         <span class="filter-label">Filtrar por Usuario</span>
         <div class="concept-select-wrapper" style="max-width: 200px;">
@@ -25,21 +44,38 @@
         </div>
       </div>
 
+      <!-- PBA006: Botón "Filtrar" (InterfazBalance escucha .btn-filterbalance para volver a traerBalance) -->
+      <button class="btn-filterbalance" style="padding: 6px 12px; border: 1px solid #d9d9d9; background: #f5f5f5; border-radius: 6px; cursor: pointer;">
+        Filtrar
+      </button>
+
+      <!-- PBA007: Acciones adicionales (Graficar e Historial) -->
       <div class="actions-group" style="display: flex; gap: 8px; margin-left: auto;">
+        
+        <!-- PBA008: Botón "Graficar" (InterfazBalance escucha .btn-graph para abrir la vista de gráficos) -->
         <button class="btn-graph" style="padding: 6px 12px; border: 5px solid #d9d9d9; background: #f5f5f5; border-radius: 6px; cursor: pointer;"
-        onclick="const f = document.getElementById('fecha') ? document.getElementById('fecha').value : '';
+        onclicka="const f = document.getElementById('fecha') ? document.getElementById('fecha').value : '';
         const u = document.getElementById('usuario') ? document.getElementById('usuario').value : '';
         const params = new URLSearchParams({ fecha: f, usuarioID: u });
-        window.location.href = '../balance_grafica.php?' + params.toString();">Graficar</button>
-        <button class="btn-history" style="padding: 6px 12px; border: 1px solid #d9d9d9; background: #f5f5f5; border-radius: 6px; cursor: pointer;">Historial</button>
+        window.location.href = '../balance_grafica.php?' + params.toString();">
+          Graficar
+        </button>
+
+        <!-- PBA009: Botón "Historial" (InterfazBalance escucha .btn-history para abrir la vista historial) -->
+        <button class="btn-history" style="padding: 6px 12px; border: 1px solid #d9d9d9; background: #f5f5f5; border-radius: 6px; cursor: pointer;">
+          Historial
+        </button>
       </div>
     </div>
 
+    <!-- PBA010: Contenedor principal de secciones (ingresos y gastos) -->
     <div class="sections-container">
-      <!-- Sección Ingresos -->
+
+      <!-- PBA011: Sección "Ingresos" -->
       <div class="section-card">
         <h2 class="section-title">Ingresos</h2>
         
+        <!-- PBA012: Tabla de ingresos (InterfazBalance inyecta filas dentro de #ingresos-list) -->
         <div class="balance-table" style="width: 100%;">
           <div class="table-header">
             <span class="col-fecha">Fecha</span>
@@ -47,6 +83,7 @@
             <span class="col-monto">Monto</span>
           </div>
           
+          <!-- PBA013: Body dinámico de ingresos -->
           <div class="table-body" id="ingresos-list" style="padding: 10px 0 6px;">
             
           </div>
@@ -54,16 +91,18 @@
 
         <hr class="divider" />
 
+        <!-- PBA014: Total de ingresos (InterfazBalance actualiza #total-ingresos) -->
         <div class="total-row">
           <span class="total-label">TOTAL</span>
           <span class="total-value" id="total-ingresos">1700</span>
         </div>
       </div>
 
-      <!-- Sección Gastos -->
+      <!-- PBA015: Sección "Gastos" -->
       <div class="section-card">
         <h2 class="section-title">Gastos</h2>
         
+        <!-- PBA016: Tabla de gastos (InterfazBalance inyecta filas dentro de #gastos-list) -->
         <div class="balance-table" style="width: 100%;">
           <div class="table-header">
             <span class="col-fecha">Fecha</span>
@@ -71,6 +110,7 @@
             <span class="col-monto">Monto</span>
           </div>
           
+          <!-- PBA017: Body dinámico de gastos -->
           <div class="table-body" id="gastos-list" style="padding: 10px 0 6px;">
             
           </div>
@@ -78,11 +118,13 @@
 
         <hr class="divider" />
 
+        <!-- PBA018: Total de gastos (InterfazBalance actualiza #total-gastos) -->
         <div class="total-row">
           <span class="total-label">TOTAL</span>
           <span class="total-value" id="total-gastos">650.00</span>
         </div>
 
+        <!-- PBA019: Resumen anual y mensual (InterfazBalance actualiza #todos-anos y #mensual) -->
         <div class="summary-box">
           <div class="summary-row">
             <span class="summary-label">Anual</span>

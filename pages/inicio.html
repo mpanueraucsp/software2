@@ -1,30 +1,57 @@
+<!--
+  PIN001
+  Interfaz (Pages) - Inicio (inicio.html).
+  Propósito: actuar como “contenedor principal” (shell) de la aplicación HomePlan:
+  - Carga el sidebar (sidebar-loader.js) dentro de #sidebar-container
+  - Define el área principal #app-main donde InterfazPrincipal inyecta las vistas (pages/*.html)
+  - Importa las interfaces JS necesarias (Ingreso, Configuración, Balance, etc.)
+  - Importa Chart.js para gráficas (InterfazGrafico.js)
+-->
+
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PIN002: Título de la página -->
   <title>Inicio - Sistema de Planificación</title>
-  
+
+  <!-- PIN003: Hoja de estilos global -->
   <link rel="stylesheet" href="../style.css" />
 
+  <!-- PIN004: Scripts base (sidebar + endpoint) -->
   <script src="../js/sidebar-loader.js"></script>
   <script src="../js/endpoint.js"></script>
+
+  <!-- PIN005: Interfaz principal (navegación e inyección de vistas en #app-main) -->
   <script src="../interfaces/InterfazPrincipal.js"></script>
+
+  <!-- PIN006: Interfaces de cada módulo (vistas) -->
   <script src="../interfaces/InterfazIngreso.js"></script>
   <script src="../interfaces/InterfazConfiguracion.js"></script>
   <script src="../interfaces/InterfazBalance.js"></script>
-  
+  <script src="../interfaces/InterfazGrafico.js"></script>
+  <script src="../interfaces/InterfazCuentas.js"></script>
+  <script src="../interfaces/InterfazHistorial.js"></script>
+
+  <!-- PIN007: Librería externa para gráficas (usada por InterfazGrafico.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- PIN008: Carga inicial del sidebar marcando “inicio” como activo -->
   <script>loadSidebar('inicio');</script>
-  
+
   <style>
-   
+    /* PIN009: Estilos adicionales opcionales para la página Inicio (vacío por ahora) */
   </style>
 </head>
+
 <body>
   <div class="layout">
+    <!-- PIN010: Contenedor del sidebar (inyectado por sidebar-loader.js) -->
     <div id="sidebar-container"></div>
 
-    <!-- Contenedor donde se inyectan vistas -->
+    <!-- PIN011: Contenedor donde InterfazPrincipal inyecta las vistas -->
     <main id="app-main" class="main-content"></main>
   </div>
 </body>

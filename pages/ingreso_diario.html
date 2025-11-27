@@ -1,92 +1,129 @@
+<!--
+  PID001
+  Interfaz (Pages) - Ingreso Diario (ingreso_diario.html).
+  Propósito: permitir registrar ingresos y gastos del día, editar registros existentes y actualizar totales.
+  Esta vista normalmente es consumida por InterfazIngreso.js, que:
+  - Inicializa la fecha (#fecha)
+  - Trae conceptos y balance del usuario
+  - Renderiza inputs de montos en #ingresos-list y #gastos-list
+  - Calcula totales (#total-ingresos, #total-gastos) y balance (#gasto-hoy, #total-general)
+  - Asigna eventos a botones .btn-edit (Editar) y .btn-update (Actualizar)
+-->
 
-  <div class="layout">
-    
-    <main class="main-content">
-      <h1 class="page-title">Ingreso Diario</h1>
+<div class="layout">
+  <main class="main-content">
 
-      <div class="date-section">
-        <div class="date-control">
-          <label>Fecha</label>
-          <div class="date-input-wrapper">
-            <input type="date" id="fecha" />
-            <span class="date-icon">✕</span>
-          </div>
-          <div class="date-hint">DD/MM/YYYY</div>
+    <!-- PID002: Título de la pantalla -->
+    <h1 class="page-title">Ingreso Diario</h1>
+
+    <!-- PID003: Sección de fecha + acciones principales (editar/actualizar) -->
+    <div class="date-section">
+      <div class="date-control">
+        <label>Fecha</label>
+
+        <!-- PID004: Input de fecha (#fecha) usado por InterfazIngreso.js -->
+        <div class="date-input-wrapper">
+          <input type="date" id="fecha" />
+          <span class="date-icon">✕</span>
         </div>
-        <button class="btn-edit" >Editar</button>
-        <button class="btn-update" >Actualizar</button>
+
+        <!-- PID005: Hint visual del formato -->
+        <div class="date-hint">DD/MM/YYYY</div>
       </div>
 
-      <div class="sections-container">
-        <!-- Sección Ingresos -->
-        <div class="section-card">
-          <h2 class="section-title">Ingresos</h2>
-          
-          <div class="item-list" id="ingresos-list"></div>
+      <!-- PID006: Botón Editar -> InterfazIngreso.js (clickEditarRegistro) -->
+      <button class="btn-edit">Editar</button>
 
-          <div class="concept-row">
-            <div class="concept-select-wrapper">
-              <select id="ingreso-concepto">
-                <option value="" disabled selected>Concepto</option>
-                <option value="ocio">Ocio</option>
-                <option value="comida">Comida</option>
-                <option value="transporte">Transporte</option>
-                <option value="ropa">Ropa</option>
-                <option value="nuevo">Nuevo</option>
-              </select>
-              <span class="select-arrow">▼</span>
-            </div>
-            <input type="number" class="amount-input" id="ingreso-monto" placeholder="0.00" step="0.01" min="0" />
+      <!-- PID007: Botón Actualizar -> InterfazIngreso.js (clickActualizar) -->
+      <button class="btn-update">Actualizar</button>
+    </div>
+
+    <div class="sections-container">
+
+      <!-- PID008: Sección Ingresos -->
+      <div class="section-card">
+        <h2 class="section-title">Ingresos</h2>
+
+        <!-- PID009: Contenedor dinámico (JS renderiza lista de conceptos/inputs) -->
+        <div class="item-list" id="ingresos-list"></div>
+
+        <!--
+          PID010: Fila de selección rápida (maqueta).
+          Nota: en tu JS actual, esta fila no es la que se usa para guardar;
+          se guardan inputs type="number" renderizados dentro de #ingresos-list / #gastos-list.
+        -->
+        <div class="concept-row">
+          <div class="concept-select-wrapper">
+            <select id="ingreso-concepto">
+              <option value="" disabled selected>Concepto</option>
+              <option value="ocio">Ocio</option>
+              <option value="comida">Comida</option>
+              <option value="transporte">Transporte</option>
+              <option value="ropa">Ropa</option>
+              <option value="nuevo">Nuevo</option>
+            </select>
+            <span class="select-arrow">▼</span>
           </div>
 
-          <hr class="divider" />
-
-          <div class="total-row">
-            <span class="total-label">TOTAL</span>
-            <span class="total-value" id="total-ingresos">0.00000</span>
-          </div>
+          <!-- PID011: Input de monto (maqueta / input auxiliar) -->
+          <input type="number" class="amount-input" id="ingreso-monto" placeholder="0.00" step="0.01" min="0" />
         </div>
 
-        <!-- Sección Gastos -->
-        <div class="section-card">
-          <h2 class="section-title">Gastos</h2>
-          
-          <div class="item-list" id="gastos-list"></div>
+        <hr class="divider" />
 
-          <div class="concept-row">
-            <div class="concept-select-wrapper">
-
-              <!-- Aquí traer conceptos de la BD -->
-              <select id="gasto-concepto">
-                <option value="" disabled selected>Concepto</option>
-                <option value="ocio">Ocio</option>
-                <option value="comida">Comida</option>
-                <option value="transporte">Transporte</option>
-                <option value="ropa">Ropa</option>
-                <option value="nuevo">Nuevo</option>
-              </select>
-              <span class="select-arrow">▼</span>
-            </div>
-            <input type="number" class="amount-input" id="gasto-monto" placeholder="0.00" step="0.01" min="0" />
-          </div>
-
-          <hr class="divider" />
-
-          <div class="total-row">
-            <span class="total-label">TOTAL</span>
-            <span class="total-value" id="total-gastos">0.00</span>
-          </div>
-
-          <div class="summary-box">
-            <div class="summary-row">
-              <span class="summary-label">Gasto de hoy</span>
-              <span class="summary-value" id="gasto-hoy">0.00</span>
-            </div>
-            <div class="summary-row">
-              <span class="summary-label">Total General</span>
-              <span class="summary-value" id="total-general">0.00</span>
-            </div>
-          </div>
+        <!-- PID012: Total de ingresos (JS lo actualiza) -->
+        <div class="total-row">
+          <span class="total-label">TOTAL</span>
+          <span class="total-value" id="total-ingresos">0.00000</span>
         </div>
       </div>
-    
+
+      <!-- PID013: Sección Gastos -->
+      <div class="section-card">
+        <h2 class="section-title">Gastos</h2>
+
+        <!-- PID014: Contenedor dinámico (JS renderiza lista de conceptos/inputs) -->
+        <div class="item-list" id="gastos-list"></div>
+
+        <!-- PID015: Fila de selección rápida (maqueta) -->
+        <div class="concept-row">
+          <div class="concept-select-wrapper">
+            <select id="gasto-concepto">
+              <option value="" disabled selected>Concepto</option>
+              <option value="ocio">Ocio</option>
+              <option value="comida">Comida</option>
+              <option value="transporte">Transporte</option>
+              <option value="ropa">Ropa</option>
+              <option value="nuevo">Nuevo</option>
+            </select>
+            <span class="select-arrow">▼</span>
+          </div>
+
+          <!-- PID016: Input de monto (maqueta / input auxiliar) -->
+          <input type="number" class="amount-input" id="gasto-monto" placeholder="0.00" step="0.01" min="0" />
+        </div>
+
+        <hr class="divider" />
+
+        <!-- PID017: Total de gastos (JS lo actualiza) -->
+        <div class="total-row">
+          <span class="total-label">TOTAL</span>
+          <span class="total-value" id="total-gastos">0.00</span>
+        </div>
+
+        <!-- PID018: Resumen general (balance del día y total general) -->
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="summary-label">Balance</span>
+            <span class="summary-value" id="gasto-hoy">0.00</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total General</span>
+            <span class="summary-value" id="total-general">0.00</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>

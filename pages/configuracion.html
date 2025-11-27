@@ -1,9 +1,38 @@
+<!--
+  PCO001
+  Interfaz (Pages) - Configuración (configuracion.html).
+  Propósito: pantalla para crear, editar y habilitar/deshabilitar conceptos.
+  Esta vista es consumida por:
+  - InterfazPrincipal -> seleccionarConfiguracion()
+  - InterfazConfiguracion.js (maneja eventos, carga conceptos y guarda cambios)
+
+  Elementos clave que usa InterfazConfiguracion:
+  - #concepto-select : combo de conceptos (llenarComboConcepto / seleccionarConcepto)
+  - #conceptoid      : hidden con el ID del concepto seleccionado
+  - #concepto-text   : input nombre del concepto
+  - name="tipo"      : radios ingreso/gasto
+  - name="periodo"   : radios de periodicidad
+  - #dia-input       : input días (habilitado según periodo)
+  - name="estado"    : radios habilitado/deshabilitado (dispara clicOpcionDeshabilitar)
+  - #btn-modificar   : botón modificar (clickModificar)
+  - #btn-guardar     : botón guardar (clickGuardar)
+  - #btn-nuevo       : botón nuevo/limpiar (limpiarDatos)
+-->
+
 <!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Configuración</title>
+
+<!--
+  PCO002
+  Estilos propios de la página:
+  - Define variables CSS (colores, radios, espaciados)
+  - Maqueta principal en grid (formulario + columna de acciones)
+  - Estilos de inputs, radios y botones
+-->
 <style>
   :root{
     --bg: #ffffff;
@@ -12,7 +41,7 @@
     --text: #222;
     --border: #e5e5e5;
     --focus: #3866ff;
-    --btn-bg: #222;      /* botones oscuros como en el mockup */
+    --btn-bg: #222;
     --btn-bg-h: #000;
     --btn-text: #fff;
     --radius: 14px;
@@ -40,7 +69,7 @@
     text-align: center;
   }
 
-  /* Layout principal: formulario a la izquierda, botones a la derecha */
+  /* PCO003: Layout principal: formulario (izquierda) + botones (derecha) */
   .grid{
     display: grid;
     grid-template-columns: 1fr 180px;
@@ -48,7 +77,7 @@
     align-items: start;
   }
 
-  /* Columna de controles */
+  /* PCO004: Columna de controles (inputs y radios) */
   .controls{
     display: grid;
     gap: 18px;
@@ -64,6 +93,7 @@
     color: var(--muted);
   }
 
+  /* PCO005: Inputs y selects */
   select, input[type="text"], input[type="date"], .fake-input{
     width: 100%;
     padding: 12px 14px;
@@ -79,7 +109,7 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 20%, transparent);
   }
 
-  /* Radios agrupados */
+  /* PCO006: Radios agrupados */
   .radio-group{
     display: grid;
     gap: 10px;
@@ -103,7 +133,7 @@
     transform: translateY(1px);
   }
 
-  /* Campo Día deshabilitado */
+  /* PCO007: Campo Día deshabilitado visualmente */
   .fake-input[aria-disabled="true"],
   input[disabled]{
     background: #f3f3f3;
@@ -111,7 +141,7 @@
     border-style: dashed;
   }
 
-  /* Botones columna derecha */
+  /* PCO008: Botones (columna derecha) */
   .actions{
     display: grid;
     gap: 18px;
@@ -133,36 +163,44 @@
   .btn:active{ transform: translateY(1px); }
   .btn:hover{ background: var(--btn-bg-h); }
 
-  /* Responsivo */
+  /* PCO009: Responsivo: en pantallas pequeñas apila columnas */
   @media (max-width: 760px){
     .grid{ grid-template-columns: 1fr; }
     .actions{ grid-auto-flow: column; justify-content: start; }
   }
 </style>
 </head>
+
 <body>
+  <!-- PCO010: Contenedor principal centrado -->
   <div class="wrap">
     <div class="card">
+      <!-- PCO011: Título de la pantalla -->
       <h2>Configuración</h2>
 
       <div class="grid">
-        <!-- Columna izquierda: formulario -->
+        <!-- PCO012: Columna izquierda: formulario de Concepto -->
         <div class="controls">
 
+          <!-- PCO013: Combo para seleccionar un concepto a editar -->
           <div class="field">
             <label class="label" for="concepto-select">Para editar seleccione un Concepto</label>
             <select id="concepto-select" aria-label="Seleccionar concepto">
               <option value="">Value</option>
-              <!-- agrega opciones reales aquí -->
+              <!-- InterfazConfiguracion llena opciones reales aquí -->
             </select>
           </div>
+
+          <!-- PCO014: Hidden para guardar el ID del concepto seleccionado -->
           <input id="conceptoid" type="hidden"/>
+
+          <!-- PCO015: Input de nombre del concepto -->
           <div class="field">
             <label class="label" for="concepto-text">Concepto</label>
             <input id="concepto-text" type="text" placeholder="Value" />
           </div>
 
-          <!-- Tipo -->
+          <!-- PCO016: Radios de Tipo (Ingreso/Gasto) -->
           <div class="field">
             <div class="label">Tipo</div>
             <div class="radio-row">
@@ -177,7 +215,7 @@
             </div>
           </div>
 
-          <!-- Periodo -->
+          <!-- PCO017: Radios de Periodo (define cómo se usa el campo Día) -->
           <div class="field">
             <div class="label">Periodo</div>
             <div class="radio-col">
@@ -204,13 +242,13 @@
             </div>
           </div>
 
-          <!-- Día (deshabilitado) -->
+          <!-- PCO018: Input Día (se habilita/deshabilita desde InterfazConfiguracion.actualizarCampoDia) -->
           <div class="field">
             <label class="label" for="dia-input">Día</label>
             <input id="dia-input" type="text" placeholder="¿Qué día de la semana?" disabled />
           </div>
 
-          <!-- Estado -->
+          <!-- PCO019: Radios Estado (Habilitado/Deshabilitado) -->
           <div class="field">
             <div class="label">Estado</div>
             <div class="radio-row">
@@ -227,10 +265,15 @@
 
         </div>
 
-        <!-- Columna derecha: botones -->
+        <!-- PCO020: Columna derecha: botones de acción (manejados por InterfazConfiguracion) -->
         <div class="actions">
+          <!-- PCO021: Botón Modificar (clickModificar) -->
           <button type="button" class="btn-update" id="btn-modificar">Modificar</button>
+
+          <!-- PCO022: Botón Guardar (clickGuardar) -->
           <button type="button" class="btn-update" id="btn-guardar">Guardar</button>
+
+          <!-- PCO023: Botón Nuevo (limpiarDatos) -->
           <button type="button" class="btn-update" id="btn-nuevo">Nuevo</button>
         </div>
       </div>
