@@ -1,31 +1,34 @@
 <!--
   PGR001
   Pages - Gráfico (graficar.html)
-  Propósito:
-  - Vista (HTML + CSS) para mostrar 3 gráficos de Balance.
-  - Esta página NO dibuja gráficos por sí sola: InterfazGrafico.js es quien consulta al backend
-    y renderiza los charts.
+
+  Propósito general:
+  - Esta vista SOLO define la estructura HTML y estilos CSS para mostrar 3 gráficos.
+  - NO genera datos ni dibuja los charts por sí sola.
+  - Un script externo (por ejemplo InterfazGrafico.js + Chart.js) es el que:
+      1) consulta al backend,
+      2) recibe los datos,
+      3) renderiza los gráficos dentro de los <canvas> por ID.
 -->
 
 <style>
-  /*
-    PGR002
-    Estilos de la barra superior:
-    - Alinea el botón "Atrás" a la derecha
-    - Deja un padding superior para separación visual
-  */
+  /* ==========================================================================
+     PGR002 - Barra superior (Top Bar)
+     - Contenedor para ubicar el botón "Atrás" alineado a la derecha.
+     - padding superior para separarlo del borde de la página.
+     ========================================================================== */
   .top-bar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end;  /* coloca el contenido al extremo derecho */
     padding: 16px 20px 0;
   }
 
-  /*
-    PGR003
-    Botón "Atrás":
-    - Diseño tipo "pill"
-    - Contraste alto para ser visible
-  */
+  /* ==========================================================================
+     PGR003 - Botón "Atrás"
+     - Estilo tipo "pill" (redondeado).
+     - Colores oscuros para buen contraste.
+     - Hover: baja levemente la opacidad.
+     ========================================================================== */
   .btn-back {
     border: none;
     background: #111827;
@@ -38,109 +41,181 @@
   }
   .btn-back:hover { opacity: 0.92; }
 
-  /*
-    PGR004
-    Contenedor principal:
-    - Centra el contenido y limita el ancho para lectura
-  */
+  /* ==========================================================================
+     PGR004 - Contenedor principal (Main)
+     - Da espacio interno (padding) a la pantalla.
+     - max-width limita el ancho para que se vea tipo "dashboard" centrado.
+     - width:100% permite que use el ancho disponible hasta el max-width.
+     ========================================================================== */
   .main {
     padding: 12px 20px 28px;
-    max-width: 1100px;
-    margin: 0 auto;
+    max-width: 1800px;
+    width: 100%;
+    margin: 0 auto; /* centra el contenedor */
   }
 
-  /* PGR005: Título de la vista */
+  /* PGR005 - Título principal */
   h1 {
     font-size: 22px;
     margin: 0 0 18px;
   }
 
-  /*
-    PGR006
-    Tarjetas de gráficos:
-    - Cada sección tiene fondo blanco, borde y sombra suave
-    - margin-bottom para separación entre tarjetas
-  */
+  /* ==========================================================================
+     PGR006 - Layout de gráficos (Grid)
+     Objetivo:
+     - Mostrar 1 card grande ARRIBA (comparativo) ocupando 2 columnas.
+     - Mostrar 2 cards ABAJO (ingresos y gastos) en 2 columnas.
+     ========================================================================== */
+  .charts-grid {
+    display: grid;
+
+    /* 2 columnas iguales. Esto permite que Ingresos y Gastos queden lado a lado */
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;             /* separación entre tarjetas */
+    align-items: stretch;  /* estira las cards para que se alineen bien */
+  }
+
+  /* ==========================================================================
+     PGR007 - Tarjetas (Cards)
+     - Visual tipo tarjeta: fondo blanco, borde suave, sombra ligera.
+     - padding para que el contenido respire.
+     - margin:0 porque el grid maneja el espaciado con gap.
+     ========================================================================== */
   .card {
     background: #fff;
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 16px;
+    padding: 18px 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     border: 1px solid #eef0f2;
-    margin-bottom: 14px;
+    margin: 0;
   }
 
-  /* PGR007: Subtítulos dentro de tarjetas */
+  /* ==========================================================================
+     PGR008 - Card ancha (Comparativo)
+     - grid-column: 1 / -1 significa: "ocupa desde la primera columna
+       hasta la última" => se ve arriba a todo el ancho.
+     ========================================================================== */
+  .card--wide {
+    grid-column: 1 / -1;
+  }
+
+  /* PGR009 - Subtítulos/títulos dentro de cada card */
   .card h3 {
-    margin: 0 0 10px;
-    font-size: 13px;
+    margin: 0 0 12px;
+    font-size: 14px;
     color: #6b7280;
-    font-weight: 600;
+    font-weight: 700;
   }
 
-  /*
-    PGR008 (IMPORTANTE)
-    Chart.js necesita que el canvas tenga una altura real para renderizar correctamente.
-    - .chart-wrap fija una altura (260px).
-    - El canvas se fuerza a ocupar el 100% del contenedor.
-    Nota:
-    - Esto es clave si usas maintainAspectRatio:false en Chart.js.
-  */
-  .chart-wrap { height: 260px; }
-  .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+  /* ==========================================================================
+     PGR010 - Contenedores de gráficos
+     IMPORTANTE para Chart.js:
+     - Chart.js necesita un "alto real" del contenedor para renderizar bien
+       (sobre todo si se usa maintainAspectRatio:false).
+     - .chart-wrap define ese alto.
+     - .chart-wrap--wide es más alto para el comparativo de arriba.
+     ========================================================================== */
+  .chart-wrap { height: 340px; }
+  .chart-wrap--wide { height: 420px; } /* comparativo más grande */
 
-  /*
-    PGR009
-    Mensajes "sin datos":
-    - Se ocultan por defecto (display:none).
-    - InterfazGrafico.js los muestra/oculta según corresponda.
-  */
+  /* ==========================================================================
+     PGR011 - Canvas de Chart.js
+     - Forzamos el canvas a ocupar todo el tamaño del contenedor.
+     - El !important ayuda a evitar que Chart.js u otros estilos lo cambien.
+     ========================================================================== */
+  .chart-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* ==========================================================================
+     PGR012 - Mensajes "sin datos"
+     - Se ocultan por defecto.
+     - InterfazGrafico.js puede mostrarlos si el backend devuelve vacío.
+     ========================================================================== */
   .no-data {
-    display:none;
+    display: none;
     margin-top: 8px;
     font-size: 13px;
     color: #9ca3af;
   }
+
+  /* ==========================================================================
+     PGR013 - Responsive
+     - En pantallas pequeñas, cambiamos a 1 columna.
+     - Así: comparativo, ingresos y gastos aparecen apilados verticalmente.
+     ========================================================================== */
+  @media (max-width: 950px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+    .card--wide {
+      grid-column: auto; /* ya no hace falta “ocupar 2 columnas” */
+    }
+  }
 </style>
 
 <!--
-  PGR010
-  Barra superior:
-  - Botón "Atrás" usando history.back() para volver a la vista anterior.
+  PGR014 - Barra superior con botón Atrás
+  - window.history.back() regresa a la página anterior del navegador.
 -->
 <div class="top-bar">
   <button class="btn-back" onclick="window.history.back()">Atrás</button>
 </div>
 
-<!--
-  PGR011
-  Contenido principal con 3 tarjetas:
-  Cada tarjeta contiene:
-  - Título
-  - Contenedor de altura fija (.chart-wrap) con su <canvas>
-  - Un div "no-data" para mostrar mensajes si no hay información
--->
 <div class="main">
+  <!-- PGR015 - Título de la vista -->
   <h1>Balance - Gráfica</h1>
 
-  <!-- PGR012: Gráfico de ingresos por concepto -->
-  <section class="card">
-    <h3>Ingresos por concepto</h3>
-    <div class="chart-wrap"><canvas id="chartIngresos"></canvas></div>
-    <div id="no-ingresos" class="no-data">No hay datos de ingresos para mostrar.</div>
-  </section>
+  <!--
+    PGR016 - Contenedor grid de 3 gráficos:
+    - ARRIBA: comparativo (2 datasets: ingresos vs gastos) [canvas chartComparativo]
+    - ABAJO IZQ: ingresos por concepto [canvas chartIngresos]
+    - ABAJO DER: gastos por concepto [canvas chartGastos]
+  -->
+  <div class="charts-grid">
+    <!--
+      PGR017 - Card superior (Comparativo)
+      - card--wide hace que ocupe el ancho completo del grid.
+      - El script externo dibuja el chart usando el ID: chartComparativo
+    -->
+    <section class="card card--wide">
+      <h3>Comparativo (Ingresos vs Gastos)</h3>
+      <div class="chart-wrap chart-wrap--wide">
+        <canvas id="chartComparativo"></canvas>
+      </div>
 
-  <!-- PGR013: Gráfico de gastos por concepto -->
-  <section class="card">
-    <h3>Gastos por concepto</h3>
-    <div class="chart-wrap"><canvas id="chartGastos"></canvas></div>
-    <div id="no-gastos" class="no-data">No hay datos de gastos para mostrar.</div>
-  </section>
+      <!-- PGR018 - Mensaje alternativo si no hay datos comparativos -->
+      <div id="no-comp" class="no-data">No hay datos para comparar.</div>
+    </section>
 
-  <!-- PGR014: Gráfico comparativo (ingresos vs gastos) -->
-  <section class="card">
-    <h3>Comparativo (Ingresos vs Gastos)</h3>
-    <div class="chart-wrap"><canvas id="chartComparativo"></canvas></div>
-    <div id="no-comp" class="no-data">No hay datos para comparar.</div>
-  </section>
+    <!--
+      PGR019 - Card inferior izquierda (Ingresos)
+      - El script externo dibuja el chart usando el ID: chartIngresos
+    -->
+    <section class="card">
+      <h3>Ingresos por concepto</h3>
+      <div class="chart-wrap">
+        <canvas id="chartIngresos"></canvas>
+      </div>
+
+      <!-- PGR020 - Mensaje alternativo si no hay datos de ingresos -->
+      <div id="no-ingresos" class="no-data">No hay datos de ingresos para mostrar.</div>
+    </section>
+
+    <!--
+      PGR021 - Card inferior derecha (Gastos)
+      - El script externo dibuja el chart usando el ID: chartGastos
+    -->
+    <section class="card">
+      <h3>Gastos por concepto</h3>
+      <div class="chart-wrap">
+        <canvas id="chartGastos"></canvas>
+      </div>
+
+      <!-- PGR022 - Mensaje alternativo si no hay datos de gastos -->
+      <div id="no-gastos" class="no-data">No hay datos de gastos para mostrar.</div>
+    </section>
+  </div>
 </div>

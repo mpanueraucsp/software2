@@ -1,25 +1,26 @@
 <!--
-  PBA001
-  Interfaz (Pages) - Balance (balance.html).
+  Pages - Balance (balance.html)
   Propósito: estructura visual de la pantalla Balance:
   - Filtros por fecha (#fecha) y usuario (#usuario)
-  - Botón de filtrar (.btn-filterbalance) que dispara la recarga de datos (JS)
+  - Botón Filtrar (.btn-filterbalance)
   - Botones de acciones: Graficar (.btn-graph) e Historial (.btn-history)
   - Contenedores donde la InterfazBalance inyecta datos:
       * #ingresos-list, #total-ingresos
       * #gastos-list,   #total-gastos
-      * #todos-anos (anual), #mensual (mensual)
+      * #todos-anos (Anual), #mensual (Mensual)
+  Nota: esta página se inyecta en el contenedor principal (#app-main) desde InterfazPrincipal.
 -->
 
 <div class="layout">
   <main class="main-content">
-    <!-- PBA002: Título de la pantalla (puede actualizarse según el usuario seleccionado) -->
+
+    <!-- BAL001: Título principal -->
     <h1 class="page-title">Balance - Yo</h1>
 
-    <!-- PBA003: Sección de filtros y acciones (fecha, usuario, filtrar, graficar, historial) -->
+    <!-- BAL002: Barra de filtros + acciones -->
     <div class="filters-section" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
 
-      <!-- PBA004: Filtro por fecha -->
+      <!-- BAL003: Filtro por fecha -->
       <div class="date-filter" style="min-width:240px;">
         <div class="date-control">
           <label>Filtrar por Fecha</label>
@@ -31,7 +32,7 @@
         </div>
       </div>
 
-      <!-- PBA005: Filtro por usuario -->
+      <!-- BAL004: Filtro por usuario -->
       <div class="filter-group" style="min-width:220px;">
         <span class="filter-label">Filtrar por Usuario</span>
         <div class="concept-select-wrapper" style="max-width:200px;">
@@ -42,7 +43,7 @@
         </div>
       </div>
 
-      <!-- PBA006: Botón "Filtrar" -->
+      <!-- BAL005: Botón Filtrar (mantiene clase .btn-filterbalance para el listener del JS) -->
       <button
         class="btn-filterbalance"
         style="
@@ -52,22 +53,23 @@
           color: #fff;
           border-radius: 12px;
           cursor: pointer;
-          font-weight: 700;
+          font-weight: 800;
           font-size: 14px;
           letter-spacing: .2px;
           box-shadow: 0 10px 18px rgba(0,0,0,.18);
-          transition: transform .08s ease, box-shadow .18s ease, filter .18s ease;
+          transition: transform .08s ease, box-shadow .18s ease;
         "
         onmouseenter="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 14px 22px rgba(0,0,0,.22)'"
         onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 18px rgba(0,0,0,.18)'"
+        type="button"
       >
         Filtrar
       </button>
 
-      <!-- PBA007: Acciones adicionales -->
+      <!-- BAL006: Acciones (Graficar / Historial). Importante: NO usar onclicka, debe ser onclick -->
       <div class="actions-group" style="display:flex; gap:12px; margin-left:auto; align-items:center;">
 
-        <!-- PBA008: Botón "Graficar" -->
+        <!-- BAL007: Graficar (mantiene clase .btn-graph para el listener del JS). -->
         <button
           class="btn-graph"
           style="
@@ -76,24 +78,19 @@
             background: #ffffff;
             border-radius: 12px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 14px;
             box-shadow: 0 10px 18px rgba(0,0,0,.10);
-            transition: transform .08s ease, box-shadow .18s ease, background .18s ease;
-            position: relative;
-            overflow: hidden;
+            transition: transform .08s ease, box-shadow .18s ease;
           "
           onmouseenter="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 14px 22px rgba(0,0,0,.14)';"
           onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 18px rgba(0,0,0,.10)';"
-          onclicka="const f = document.getElementById('fecha') ? document.getElementById('fecha').value : '';
-          const u = document.getElementById('usuario') ? document.getElementById('usuario').value : '';
-          const params = new URLSearchParams({ fecha: f, usuarioID: u });
-          window.location.href = '../balance_grafica.php?' + params.toString();"
+          type="button"
         >
           📊 Graficar
         </button>
 
-        <!-- PBA009: Botón "Historial" -->
+        <!-- BAL008: Historial (mantiene clase .btn-history para el listener del JS) -->
         <button
           class="btn-history"
           style="
@@ -102,19 +99,21 @@
             background: #ffffff;
             border-radius: 12px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 14px;
             box-shadow: 0 10px 18px rgba(0,0,0,.10);
-            transition: transform .08s ease, box-shadow .18s ease, background .18s ease;
+            transition: transform .08s ease, box-shadow .18s ease;
           "
           onmouseenter="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 14px 22px rgba(0,0,0,.14)';"
           onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 18px rgba(0,0,0,.10)';"
+          type="button"
         >
           🧾 Historial
         </button>
       </div>
     </div>
 
+    <!-- BAL009: Hero del Balance (solo Anual / Mensual grandes y visibles) -->
     <div
       class="balance-hero"
       style="
@@ -126,7 +125,7 @@
     >
       <div
         style="
-          width: min(820px, 100%);
+          width: min(980px, 100%);
           background: linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%);
           border: 1px solid #e5e7eb;
           border-radius: 18px;
@@ -135,11 +134,11 @@
           text-align: center;
         "
       >
-        <div style="font-size: 13px; color:#6b7280; font-weight:800; letter-spacing:.18em; text-transform: uppercase;">
+        <div style="font-size: 13px; color:#6b7280; font-weight:900; letter-spacing:.18em; text-transform: uppercase;">
           Balance
         </div>
 
-        <!-- ✅ BLOQUE ANUAL / MENSUAL MÁS GRANDE Y VISIBLE -->
+        <!-- BAL010: Bloque Anual / Mensual grande -->
         <div style="margin-top: 18px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
           <!-- ANUAL -->
           <div
@@ -148,7 +147,7 @@
               border:1px solid #e5e7eb;
               border-radius: 18px;
               padding: 22px 26px;
-              min-width: 300px;
+              min-width: 320px;
               box-shadow: 0 16px 28px rgba(0,0,0,.12);
               text-align:center;
               position: relative;
@@ -158,12 +157,12 @@
             onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 20px 34px rgba(0,0,0,.14)'"
             onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 16px 28px rgba(0,0,0,.12)'"
           >
-            <div style="position:absolute; inset:0 auto auto 0; width:100%; height:6px; background: rgba(16,185,129,.9);"></div>
+            <div style="position:absolute; inset:0 auto auto 0; width:100%; height:7px; background: rgba(16,185,129,.95);"></div>
 
             <div style="font-size:15px; color:#6b7280; font-weight:900; letter-spacing:.10em; text-transform:uppercase;">
               Anual
             </div>
-            <div style="margin-top: 10px; font-size:34px; font-weight:900; line-height:1.1;">
+            <div style="margin-top: 10px; font-size:38px; font-weight:900; line-height:1.1;">
               S/ <span id="todos-anos">15.00</span>
             </div>
           </div>
@@ -175,7 +174,7 @@
               border:1px solid #e5e7eb;
               border-radius: 18px;
               padding: 22px 26px;
-              min-width: 300px;
+              min-width: 320px;
               box-shadow: 0 16px 28px rgba(0,0,0,.12);
               text-align:center;
               position: relative;
@@ -185,12 +184,12 @@
             onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 20px 34px rgba(0,0,0,.14)'"
             onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 16px 28px rgba(0,0,0,.12)'"
           >
-            <div style="position:absolute; inset:0 auto auto 0; width:100%; height:6px; background: rgba(59,130,246,.9);"></div>
+            <div style="position:absolute; inset:0 auto auto 0; width:100%; height:7px; background: rgba(59,130,246,.95);"></div>
 
             <div style="font-size:15px; color:#6b7280; font-weight:900; letter-spacing:.10em; text-transform:uppercase;">
               Mensual
             </div>
-            <div style="margin-top: 10px; font-size:34px; font-weight:900; line-height:1.1;">
+            <div style="margin-top: 10px; font-size:38px; font-weight:900; line-height:1.1;">
               S/ <span id="mensual">15.00</span>
             </div>
           </div>
@@ -202,10 +201,10 @@
       </div>
     </div>
 
-    <!-- PBA010: Contenedor principal de secciones (ingresos y gastos) -->
+    <!-- BAL011: Secciones de Ingresos y Gastos -->
     <div class="sections-container">
 
-      <!-- PBA011: Sección "Ingresos" -->
+      <!-- BAL012: INGRESOS -->
       <div class="section-card">
         <h2 class="section-title">Ingresos</h2>
 
@@ -216,6 +215,7 @@
             <span class="col-monto">Monto</span>
           </div>
 
+          <!-- BAL013: Aquí InterfazBalance pinta filas -->
           <div class="table-body" id="ingresos-list" style="padding:10px 0 6px;"></div>
         </div>
 
@@ -223,11 +223,11 @@
 
         <div class="total-row">
           <span class="total-label">TOTAL</span>
-          <span class="total-value" id="total-ingresos">1700</span>
+          <span class="total-value" id="total-ingresos">0.00</span>
         </div>
       </div>
 
-      <!-- PBA015: Sección "Gastos" -->
+      <!-- BAL014: GASTOS -->
       <div class="section-card">
         <h2 class="section-title">Gastos</h2>
 
@@ -238,6 +238,7 @@
             <span class="col-monto">Monto</span>
           </div>
 
+          <!-- BAL015: Aquí InterfazBalance pinta filas -->
           <div class="table-body" id="gastos-list" style="padding:10px 0 6px;"></div>
         </div>
 
@@ -245,7 +246,7 @@
 
         <div class="total-row">
           <span class="total-label">TOTAL</span>
-          <span class="total-value" id="total-gastos">650.00</span>
+          <span class="total-value" id="total-gastos">0.00</span>
         </div>
       </div>
 
