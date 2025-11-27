@@ -1,193 +1,146 @@
 <!--
   PGR001
-  Interfaz (Pages) - Gráfico (graficar.html).
-  Propósito: mostrar gráficos (pie y barras) para INGRESOS y GASTOS usando <canvas>.
-  Esta vista normalmente es consumida por InterfazGrafico.js, que:
-  - Obtiene datos desde el backend (api/gbalance/traerGraficoIngresos)
-  - Renderiza charts en: #pieIngresos #barIngresos #pieGastos #barGastos
-  Requisitos externos:
-  - Debe cargarse Chart.js en esta página (no está incluido aquí).
+  Pages - Gráfico (graficar.html)
+  Propósito:
+  - Vista (HTML + CSS) para mostrar 3 gráficos de Balance.
+  - Esta página NO dibuja gráficos por sí sola: InterfazGrafico.js es quien consulta al backend
+    y renderiza los charts.
 -->
 
-<html lang="es">
-<head>
-    <!-- PGR002: Metadatos básicos -->
-    <meta charset="UTF-8">
-    <title>Balance - Gráfica</title>
+<style>
+  /*
+    PGR002
+    Estilos de la barra superior:
+    - Alinea el botón "Atrás" a la derecha
+    - Deja un padding superior para separación visual
+  */
+  .top-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 20px 0;
+  }
 
-    <!--
-      PGR003
-      Estilos internos:
-      - Layout tipo "dashboard" (columna izquierda + contenido) aunque aquí no se usa el sidebar HTML.
-      - Cards y tamaño máximo de canvas para gráficos.
-      - Botón "Atrás" fijo arriba.
-    -->
-    <style>
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #f3f4f6;
-            color: #111827;
-        }
+  /*
+    PGR003
+    Botón "Atrás":
+    - Diseño tipo "pill"
+    - Contraste alto para ser visible
+  */
+  .btn-back {
+    border: none;
+    background: #111827;
+    color: #f9fafb;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .btn-back:hover { opacity: 0.92; }
 
-        .layout {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
+  /*
+    PGR004
+    Contenedor principal:
+    - Centra el contenido y limita el ancho para lectura
+  */
+  .main {
+    padding: 12px 20px 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
-        /* PGR004: Sidebar (definido en CSS pero no se instancia en este HTML) */
-        .sidebar {
-            background: #f9fafb;
-            border-right: 1px solid #e5e7eb;
-            padding: 24px 20px;
+  /* PGR005: Título de la vista */
+  h1 {
+    font-size: 22px;
+    margin: 0 0 18px;
+  }
 
-            position: sticky;
-            top: 0;
-            align-self: start;
-            height: 100vh;
-            box-sizing: border-box;
-        }
+  /*
+    PGR006
+    Tarjetas de gráficos:
+    - Cada sección tiene fondo blanco, borde y sombra suave
+    - margin-bottom para separación entre tarjetas
+  */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #eef0f2;
+    margin-bottom: 14px;
+  }
 
-        .sidebar-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
+  /* PGR007: Subtítulos dentro de tarjetas */
+  .card h3 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+  }
 
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 14px;
-        }
+  /*
+    PGR008 (IMPORTANTE)
+    Chart.js necesita que el canvas tenga una altura real para renderizar correctamente.
+    - .chart-wrap fija una altura (260px).
+    - El canvas se fuerza a ocupar el 100% del contenedor.
+    Nota:
+    - Esto es clave si usas maintainAspectRatio:false en Chart.js.
+  */
+  .chart-wrap { height: 260px; }
+  .chart-wrap canvas { width: 100% !important; height: 100% !important; }
 
-        .sidebar-menu li { margin-bottom: 8px; }
-        .sidebar-menu li strong { font-weight: 600; }
+  /*
+    PGR009
+    Mensajes "sin datos":
+    - Se ocultan por defecto (display:none).
+    - InterfazGrafico.js los muestra/oculta según corresponda.
+  */
+  .no-data {
+    display:none;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #9ca3af;
+  }
+</style>
 
-        /* PGR005: Contenido principal (si se usa layout) */
-        .main-content {
-            padding: 24px 40px 40px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+<!--
+  PGR010
+  Barra superior:
+  - Botón "Atrás" usando history.back() para volver a la vista anterior.
+-->
+<div class="top-bar">
+  <button class="btn-back" onclick="window.history.back()">Atrás</button>
+</div>
 
-        /* PGR006: Barra superior con botón Atrás */
-        .top-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 16px;
-        }
-
-        .btn-back {
-            border: none;
-            background: #111827;
-            color: #f9fafb;
-            padding: 8px 18px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-back:hover { opacity: 0.9; }
-
-        h1 { font-size: 22px; margin: 0 0 24px; }
-        h2 { font-size: 18px; margin: 24px 0 8px; }
-        h3 { font-size: 14px; margin: 4px 0 8px; color: #6b7280; }
-
-        /* PGR007: Grid de tarjetas para gráficos */
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 10px 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        /* PGR008: Limite visual de tamaño para canvas */
-        .card canvas {
-            max-width: 100%;
-            max-height: 200px;
-        }
-
-        .error {
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .no-data {
-            font-size: 13px;
-            color: #9ca3af;
-            margin-top: 6px;
-        }
-    </style>
-</head>
-
-<body>
-  <!-- PGR009: Botón de navegación (regresa a la pantalla anterior en el historial del navegador) -->
-  <div class="top-bar">
-      <button class="btn-back" onclick="window.history.back()">Atrás</button>
-  </div>
-
-  <!-- PGR010: Título principal -->
+<!--
+  PGR011
+  Contenido principal con 3 tarjetas:
+  Cada tarjeta contiene:
+  - Título
+  - Contenedor de altura fija (.chart-wrap) con su <canvas>
+  - Un div "no-data" para mostrar mensajes si no hay información
+-->
+<div class="main">
   <h1>Balance - Gráfica</h1>
 
-  <!--
-    PGR011
-    Sección INGRESOS:
-    Canvas usados por InterfazGrafico.js:
-    - #pieIngresos : pie chart distribución por ingresos
-    - #barIngresos : bar chart ingresos por concepto
-  -->
-  <section>
-      <h2>INGRESOS</h2>
-      <div class="row">
-          <div class="card">
-              <h3>Distribución por Ingresos</h3>
-              <canvas id="pieIngresos"></canvas>
-          </div>
-          <div class="card">
-              <h3>Ingresos por conceptos</h3>
-              <canvas id="barIngresos"></canvas>
-          </div>
-      </div>
+  <!-- PGR012: Gráfico de ingresos por concepto -->
+  <section class="card">
+    <h3>Ingresos por concepto</h3>
+    <div class="chart-wrap"><canvas id="chartIngresos"></canvas></div>
+    <div id="no-ingresos" class="no-data">No hay datos de ingresos para mostrar.</div>
   </section>
 
-  <!--
-    PGR012
-    Sección GASTOS:
-    Canvas usados por InterfazGrafico.js:
-    - #pieGastos : pie chart distribución por gastos
-    - #barGastos : bar chart gastos por concepto
-  -->
-  <section>
-      <h2>GASTOS</h2>
-      <div class="row">
-          <div class="card">
-              <h3>Distribución por Gastos</h3>
-              <canvas id="pieGastos"></canvas>
-          </div>
-          <div class="card">
-              <h3>Gastos por conceptos</h3>
-              <canvas id="barGastos"></canvas>
-          </div>
-      </div>
+  <!-- PGR013: Gráfico de gastos por concepto -->
+  <section class="card">
+    <h3>Gastos por concepto</h3>
+    <div class="chart-wrap"><canvas id="chartGastos"></canvas></div>
+    <div id="no-gastos" class="no-data">No hay datos de gastos para mostrar.</div>
   </section>
 
-  <!--
-    PGR013 (nota técnica)
-    Aquí normalmente irían los <script>:
-    - Chart.js (CDN o local)
-    - InterfazGrafico.js (si esta página se usa standalone)
-  -->
-</body>
-</html>
+  <!-- PGR014: Gráfico comparativo (ingresos vs gastos) -->
+  <section class="card">
+    <h3>Comparativo (Ingresos vs Gastos)</h3>
+    <div class="chart-wrap"><canvas id="chartComparativo"></canvas></div>
+    <div id="no-comp" class="no-data">No hay datos para comparar.</div>
+  </section>
+</div>
