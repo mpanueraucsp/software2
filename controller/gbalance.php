@@ -47,11 +47,11 @@
             if ($fecha=="") $fecha = date('Y-m-d');
 
             // Llamada a función SQL: retorna un JSON en la columna "balance"
-            $sql = "SELECT traerBalance($1, $2, $3) AS balance";
+            $sql = "traerBalance($1, $2, $3) AS balance";
             $params = [$usuarioID, $token, $fecha];
 
             // Ejecuta consulta con parámetros para mayor seguridad
-            $res = $db->queryParams($sql, $params);
+            $res = $db->executeParams($sql, $params);
 
             // Obtiene la fila resultante
             $row = pg_fetch_assoc($res);
@@ -93,7 +93,7 @@
             if ($fecha=="") $fecha = date('Y-m-d');
 
             // Llamada a función SQL que retorna dos columnas (listabalance, listamovimientos)
-            $sql = "SELECT * FROM traerMovimientos($1, $2, $3, $4)";
+            $sql = "traerMovimientos($1, $2, $3, $4)";
             $params = [$token, $usuarioID, $tipoUsuario, $fecha];
 
             // Ejecuta consulta con parámetros
@@ -137,7 +137,7 @@
             $db = Database::getInstance();
 
             // Función SQL para obtener resumen por concepto según tipo
-            $sql = "SELECT * FROM traerResumen($1, $2)";
+            $sql = "traerResumen($1, $2)";
 
             // INGRESOS: tipoconconcepto = '1'
             $resultIngresos = $db->queryParams($sql, [$usuarioID, '1']);
@@ -172,7 +172,7 @@
             $db = Database::getInstance();
 
             // Llamada a función SQL de historial por rango
-            $sql = "SELECT * FROM traerHistorial($1, $2, $3, $4)";
+            $sql = "traerHistorial($1, $2, $3, $4)";
             $params = [$token, $usuarioID, $fechainicio, $fechafin];
 
             // Ejecuta consulta con parámetros

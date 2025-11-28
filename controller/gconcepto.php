@@ -52,11 +52,11 @@
             $db = Database::getInstance();
 
             // Validación de duplicado: consulta si el concepto ya existe para el usuario
-            $sql = "SELECT validarConcepto($1, $2) AS valido";
+            $sql = "validarConcepto($1, $2) AS valido";
             $params = array($this->nombre, $this->usuarioID);
 
             // Ejecutar consulta con parámetros
-            $result = $db->queryParams($sql, $params);
+            $result = $db->executeParams($sql, $params);
 
             // Obtener resultado (valido = 't' o 'f')
             $row = pg_fetch_assoc($result);
@@ -68,11 +68,11 @@
                 $db = Database::getInstance();
 
                 // Guardar concepto en BD
-                $sql = "SELECT guardarConcepto($1, $2, $3, $4, $5, $6) AS r";
+                $sql = "guardarConcepto($1, $2, $3, $4, $5, $6) AS r";
                 $params = [$this->nombre, $this->tipo, $this->periodo, $this->dia, $this->usuarioID, $this->token];
 
                 // Ejecutar guardado
-                $res = $db->queryParams($sql, $params);
+                $res = $db->executeParams($sql, $params);
                 $row = pg_fetch_assoc($res);
 
                 // Respuesta para la interfaz
@@ -107,7 +107,7 @@
                 $db = Database::getInstance();
 
                 // 2) Llamada a función PostgreSQL que filtra por periodicidad/fecha
-                $sql = "SELECT * FROM traerConceptos($1, $2)";
+                $sql = "traerConceptos($1, $2)";
                 $params = [$this->usuarioID, $fecha];
 
                 // 3) Ejecutar función con parámetros
@@ -148,7 +148,7 @@
                 $db = Database::getInstance();
 
                 // 2) Llamada a función PostgreSQL que trae conceptos por usuario
-                $sql = "SELECT * FROM traerConceptos($1)";
+                $sql = "traerConceptos($1)";
                 $params = [$this->usuarioID];
 
                 // 3) Ejecutar función con parámetros
@@ -185,7 +185,7 @@
                 $db = Database::getInstance();
 
                 // 2) Llamada a función PostgreSQL consultarDatos(conceptoID)
-                $sql = "SELECT * FROM consultarDatos($1)";
+                $sql = "consultarDatos($1)";
                 $params = [$this->conceptoID];
 
                 // 3) Ejecutar función con parámetros
@@ -239,11 +239,11 @@
             $db = Database::getInstance();
 
             // Validación: evita duplicados al editar (excluye el mismo conceptoid)
-            $sql = "SELECT validar($1, $2, $3) AS cambioOk";
+            $sql = "validar($1, $2, $3) AS cambioOk";
             $params = array($this->conceptoID, $this->nombre, $this->usuarioID);
 
             // Ejecutar consulta
-            $result = $db->queryParams($sql, $params);
+            $result = $db->executeParams($sql, $params);
             $row = pg_fetch_assoc($result);
 
             // Si cambioOk es TRUE, se procede a guardar
@@ -253,10 +253,10 @@
                 $db = Database::getInstance();
 
                 // Guardar modificación del concepto
-                $sql = "SELECT guardarModificacion($1, $2, $3, $4, $5, $6, $7) AS r";
+                $sql = "guardarModificacion($1, $2, $3, $4, $5, $6, $7) AS r";
                 $params = [$this->conceptoID, $this->nombre, $this->tipo, $this->periodo, $this->dia, $this->usuarioID, $this->token];
 
-                $res = $db->queryParams($sql, $params);
+                $res = $db->executeParams($sql, $params);
                 $row = pg_fetch_assoc($res);
 
                 // Respuesta para la interfaz
@@ -286,10 +286,10 @@
             $db = Database::getInstance();
 
             // Validar si el estado ya es el mismo (TRUE si coincide)
-            $sql = "SELECT validarEstado($1, $2) AS estado";
+            $sql = "validarEstado($1, $2) AS estado";
             $params = array($this->conceptoID, $estado);
 
-            $result = $db->queryParams($sql, $params);
+            $result = $db->executeParams($sql, $params);
             $row = pg_fetch_assoc($result);
 
             // Si estado = 'f', significa que NO coincide y se debe actualizar
@@ -299,10 +299,10 @@
                 $db = Database::getInstance();
 
                 // Actualiza el estado en BD
-                $sql = "SELECT actualizarEstado($1, $2) AS r";
+                $sql = "actualizarEstado($1, $2) AS r";
                 $params = [$this->conceptoID, $estado];
 
-                $res = $db->queryParams($sql, $params);
+                $res = $db->executeParams($sql, $params);
                 $row = pg_fetch_assoc($res);
 
                 // Respuesta de éxito

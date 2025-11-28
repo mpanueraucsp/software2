@@ -37,6 +37,14 @@
       </div>
     </a>
 
+    <a href="cuentas.html" class="nav-item" data-page="cambiarclave">
+      <span class="nav-icon">☆</span>
+      <div class="nav-content">
+        <div class="nav-label" style="text-transform: capitalize; font-weight: 400;">Cambiar contraseña</div>
+        <div class="nav-desc" style="color: black;">Cambiar la contraseña del usuario</div>
+      </div>
+    </a>
+
     <a href="javascript:;" class="nav-item" data-page="configuracion">
       <span class="nav-icon">☆</span>
       <div class="nav-content">

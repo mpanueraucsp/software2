@@ -66,6 +66,9 @@ class InterfazPrincipal {
       case 'cuentas':
         this.mostrarCuentas();
         break;
+      case 'cambiarclave':
+        this.seleccionarCambiarClave();
+        break;
       default:
         console.log("Página no reconocida:", page);
     }
@@ -262,5 +265,30 @@ class InterfazPrincipal {
         scope.activarSideBar("balance");
       })
       .catch(err => console.error('Error al cargar balance:', err));
+  }
+
+  /**
+   * ICP01
+   * seleccionarCambiarClave:
+   * - Carga pages/cambiarclave.html en <main>
+   * - Inicializa InterfazCuentas y muestra la pestaña
+   * - Actualiza el sidebar con "cambiarclave" activo
+   */
+  seleccionarCambiarClave() {
+    var scope = this;
+
+    fetch('../pages/cambiarclave.html')
+      .then(r => r.text())
+      .then(html => {
+        document.querySelector('main').innerHTML = html;
+
+        // Inicializa módulo Cuentas
+        window.uiCambio = new InterfazCambiarClave();
+        window.uiCambio.mostrarPestana(this.usuarioID, this.token);
+
+        // Marca sidebar activo
+        scope.activarSideBar("cambiarclave");
+      })
+      .catch(err => console.error('Error al cargar cuentas:', err));
   }
 }

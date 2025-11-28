@@ -44,13 +44,13 @@
             $datosJson = json_decode($datos, true);
 
             // Llamada a función SQL: guardarDatos recibe un jsonb con movimientos
-            $sql = "SELECT guardarDatos($1::jsonb) AS r";
+            $sql = "guardarDatos($1::jsonb) AS r";
 
             // Se vuelve a codificar a JSON para enviarlo a PostgreSQL como jsonb
             $params = [ json_encode($datosJson, JSON_UNESCAPED_UNICODE) ];
 
             // Ejecutar consulta con parámetros
-            $res = $db->queryParams($sql, $params);
+            $res = $db->executeParams($sql, $params);
 
             // Obtener respuesta (columna "r" contiene un JSON con ok e items)
             $row = pg_fetch_assoc($res);
@@ -93,7 +93,7 @@
                 $db = Database::getInstance();
 
                 // 2) Llamada a función PostgreSQL obtenerCuentaUsuario
-                $sql = "SELECT * FROM obtenerCuentaUsuario($1, $2)";
+                $sql = "obtenerCuentaUsuario($1, $2)";
                 $params = [$this->usuarioID, $fecha];
 
                 // 3) Ejecutar la función con parámetros

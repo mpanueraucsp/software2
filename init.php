@@ -37,6 +37,14 @@
                         $_REQUEST["usuarioID"]   
                     );
                 }
+                // FCU-003: Actualizar contraseña
+                if ($funcion == "actualizarcontrasena"){
+                    $result = $class->$funcion(
+                        $_REQUEST["usuarioID"], 
+                        $_REQUEST["anterior"], 
+                        $_REQUEST["nueva"]
+                    );
+                }
             }
             if ($controlador=="gconcepto"){
                 if ($funcion=="validarParametros"){

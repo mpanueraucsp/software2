@@ -104,13 +104,25 @@ class Database {
      * @throws Exception si ocurre un error en la consulta
      */
     public function queryParams(string $sql, array $params) {
+        if (!preg_match('/^\s*select/i', $sql)) {
+            $sql = "select * from " . $sql;
+        }
         $result = pg_query_params($this->connection, $sql, $params);
-
         // Si falla, lanza excepción con el error exacto
         if (!$result) {
             throw new Exception("❌ Error en la consulta con parámetros: " . pg_last_error($this->connection));
         }
-
+        return $result;
+    }
+    public function executeParams(string $sql, array $params) {
+        if (!preg_match('/^\s*select/i', $sql)) {
+            $sql = "select " . $sql;
+        }
+        $result = pg_query_params($this->connection, $sql, $params);
+        // Si falla, lanza excepción con el error exacto
+        if (!$result) {
+            throw new Exception("❌ Error en la consulta con parámetros: " . pg_last_error($this->connection));
+        }
         return $result;
     }
 

@@ -42,7 +42,7 @@
             $db = Database::getInstance();
 
             // Llamada a función SQL de autenticación
-            $sql = "SELECT * FROM verificarUsuario($1, $2)";
+            $sql = "verificarUsuario($1, $2)";
             $params = [ $this->usuario, $this->contrasena ];
 
             // Ejecutar consulta parametrizada
@@ -82,8 +82,8 @@
             $db = Database::getInstance();
 
             // Llamada a función SQL de listado
-            $sql = "SELECT * FROM mostrarUsuarios()";
-            $res = $db->query($sql);
+            $sql = "mostrarUsuarios()";
+            $res = $db->queryParams($sql, array());
 
             // Armar arreglo de respuesta para la interfaz
             $usuarios = array();
@@ -93,44 +93,6 @@
                     "nombre" => $row["nombre"],                     // Nombre completo
                     "nombre_de_usuario" => $row["nombre_de_usuario"],// Username
                     "perfil" => $row["perfil"]                      // Nombre del perfil
-                );
-            }
-
-            return $usuarios;
-        }
-
-        /**
-         * CGU004
-         * Controlador - Usuario (Listar usuarios - consulta directa).
-         * Se encarga de obtener el listado completo de usuarios registrados mediante una consulta directa a la tabla.
-         *
-         * Nota:
-         * - Este método no usa la función mostrarUsuarios().
-         * - OJO: los nombres de columna aquí (usuario_id, usuario, tipousuario_id) deben existir tal cual en tu BD,
-         *   si no, este método podría ser de una versión antigua del esquema.
-         *
-         * @return array Lista de usuarios con sus datos básicos.
-         */
-        function mostrarUsuarios1(){
-            // Obtener instancia BD
-            $db = Database::getInstance();
-
-            // Consulta directa (tabla usuarios)
-            $sql = "SELECT usuario_id, nombre, usuario, tipousuario_id as perfil, estado 
-                    FROM usuarios 
-                    ORDER BY usuario_id ASC";
-
-            $res = $db->query($sql);
-
-            // Armar arreglo de respuesta
-            $usuarios = array();
-            while ($row = pg_fetch_assoc($res)) {
-                $usuarios[] = array(
-                    "usuarioID" => (int)$row["usuario_id"], // ID usuario
-                    "nombre" => $row["nombre"],             // Nombre
-                    "usuario" => $row["usuario"],           // Username (columna alternativa)
-                    "perfil" => $row["perfil"],             // ID del perfil
-                    "estado" => $row["estado"]              // Estado (1=Activo, 0=Inactivo)
                 );
             }
 
@@ -190,6 +152,45 @@
                 // Manejo de error de BD
                 return array("success" => false, "msg" => "Error BD: " . $e->getMessage());
             }
+        }
+
+        /**
+         * CGU005
+         * Controlador - Usuario (Crear usuario).
+         * Se encarga de actualizar la contraseña
+         *
+         *
+         * @param int $usuarioID_creador ID de quien crea (no usado en este método).
+         * @param int $nuevaclave
+         * @param int $anteriorclave
+         * @return array Resultado (success bool, id o msg).
+         */
+        function actualizarcontrasena($usuarioID, $anterior, $nueva){
+            // Obtener instancia de BD
+            $db = Database::getInstance();
+        
+            // SQL llamando a la función de PostgreSQL
+            $sql = "actualizarcontrasena($1, $2, $3) AS cambiosok";
+        
+            // Parámetros
+            $params = array($usuarioID, $anterior, $nueva);
+        
+            // Ejecutar consulta
+            $result = $db->executeParams($sql, $params);
+        
+            if (!$result) {
+                return false;  // Error en la ejecución
+            }
+        
+            // Obtener resultado
+            $row = pg_fetch_assoc($result);
+        
+            // PostgreSQL devuelve 't' o 'f' en boolean
+            if ($row && $row['cambiosok'] === 't') {
+                return array("cambiosOK"=>true);   // Cambio exitoso
+            }
+        
+            return array("cambiosOK"=>false);  // Contraseña incorrecta o fallo
         }
     };
 ?>

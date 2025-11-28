@@ -1,0 +1,111 @@
+<!--
+  PCC001
+  Interfaz (Pages) - CambiarClave (cambiarclave.html).
+  Propósito: cambiar la clave del usuario.
+  Esta vista se apoya en:
+  - sidebar-loader.js  -> loadSidebar('cuentas') carga el componente Sidebar en #sidebar-container
+  - InterfazPrincipal.js (importado por navegación general)
+
+  IDs clave que usa InterfazCuentas:
+  - #oldpass : contraseña anterior
+  - #newpass               : nueva contraseña
+  - #repeatpass               : repetir la nueva contraseña
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cambiar contraseña</title>
+  <style>
+
+
+.container {
+  width: 100%;
+  max-width: 430px;
+  text-align: center;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #8a8a8a;
+  margin-bottom: 35px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+label {
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s;
+}
+
+input:focus {
+  border-color: #8e44ff;
+  box-shadow: 0 0 0 2px rgba(142, 68, 255, 0.15);
+}
+
+.btn-cambiarclave {
+  margin-top: 18px;
+  background: #1c1c1e;
+  color: #fff;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-cambiarclave:hover {
+  background: #000;
+}
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1 class="title">Cambiar contraseña</h1>
+    <p class="subtitle">Ingresa los datos para cambiar la contraseña</p>
+
+    <form class="form">
+
+      <label for="oldpass">Anterior contraseña</label>
+      <input type="password" id="oldpass" placeholder="Ingrese la contraseña actual">
+
+      <label for="newpass">Nueva Contraseña</label>
+      <input type="password" id="newpass" placeholder="Ingrese la nueva contraseña">
+
+      <label for="repeatpass">Repita la contraseña</label>
+      <input type="password" id="repeatpass" placeholder="Repita la nueva contraseña">
+
+      <button type="button" class="btn-cambiarclave">Cambiar contraseña</button>
+
+    </form>
+  </div>
+
+</body>
+</html>
