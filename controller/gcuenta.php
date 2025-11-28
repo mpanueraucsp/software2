@@ -2,7 +2,7 @@
     require_once 'database.php';
 
     /**
-     * CGQ001
+     * G-003
      * Controlador - GCuenta (gcuenta.php).
      * Propósito: gestionar las cuentas/movimientos de ingresos y egresos del usuario:
      * - Enviar/guardar movimientos (ingresos/gastos) en BD desde un JSON
@@ -22,7 +22,7 @@
         public $token;
 
         /**
-         * CGQ002
+         * FCC002
          * Controlador - Cuenta (Guardar movimientos).
          * Se encarga de enviar a la BD los movimientos (ingresos/gastos) recibidos en formato JSON.
          *
@@ -63,7 +63,7 @@
         }
 
         /**
-         * CGQ003
+         * FCC003
          * Controlador - Cuenta (Cargar cuenta del usuario).
          * Se encarga de obtener la cuenta del usuario para una fecha:
          * - Lista de conceptos aplicables + monto (si existe registro en movimientos_detalles)

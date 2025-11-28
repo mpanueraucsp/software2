@@ -1,5 +1,5 @@
 /**
- * ICI001
+ * UI-008
  * Interfaz - Clase InterfazIngreso.
  * Propósito: gestionar la vista de "Ingreso diario":
  * - Cargar conceptos según periodicidad y fecha
@@ -25,7 +25,7 @@ class InterfazIngreso {
   gastos   = []; // Lista de conceptos tipo gasto
 
   /**
-   * ICI002
+   * FII002
    * Constructor: coloca fecha actual e inicializa eventos de la vista.
    */
   constructor() {
@@ -34,7 +34,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI003
+   * FII003
    * mostrarPestana: inicializa la pestaña "Ingreso diario" con usuario y token.
    * - Carga conceptos disponibles por periodicidad (según fecha)
    * - Carga balance para mostrar resumen
@@ -53,7 +53,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI004
+   * FII004
    * traerConceptos: consume el endpoint que retorna conceptos válidos para la fecha (periodicidad).
    * Usa api/gconcepto/traerConceptoPorPeriodicidad con usuarioID, token y fecha.
    */
@@ -88,7 +88,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI005
+   * FII005
    * mostrarConceptos: separa los conceptos recibidos en ingresos y gastos y actualiza la UI.
    * - Luego renderiza inputs y calcula totales.
    */
@@ -118,7 +118,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI006
+   * FII006
    * colocarFechaActual: inicializa el input de fecha con hoy y guarda this.fecha.
    */
   colocarFechaActual() {
@@ -130,7 +130,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI007
+   * FII007
    * clickActualizar: recolecta los montos ingresados y envía el payload hacia el backend (guardarDatos).
    * - Lee solo inputs dinámicos (.input-ingreso y .input-gastos)
    * - Construye payload { datos: [...] }
@@ -193,7 +193,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI008
+   * FII008
    * mostrarMensaje: muestra un mensaje simple al usuario (alert).
    */
   mostrarMensaje(mensaje){
@@ -201,7 +201,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI009
+   * FII009
    * traerBalance: consulta el balance del usuario al backend y actualiza la UI con mostrarBalance().
    */
   traerBalance(){
@@ -228,7 +228,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI010
+   * FII010
    * mostrarBalance: muestra el total mensual/total general en #total-general.
    * Nota: el código usa lista.total_mensual (según tu implementación).
    */
@@ -242,7 +242,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI011
+   * FII011
    * asignarEventos:
    * - .btn-update => clickActualizar
    * - .btn-edit   => clickEditarRegistro
@@ -279,7 +279,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI012
+   * FII012
    * setupIngresoListener: listener alternativo (no usado por el flujo actual).
    * Nota: Este bloque usa variables globales (ingresos/renderIngresos/calcularTotales) y
    * no métodos this.*. Se deja como legado/no recomendado.
@@ -312,7 +312,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI013
+   * FII013
    * setupGastoListener: listener alternativo (no usado por el flujo actual).
    */
   setupGastoListener() {
@@ -343,7 +343,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI014
+   * FII014
    * renderIngresos: renderiza la lista de ingresos como inputs numéricos
    * y agrega listeners para recalcular totales en tiempo real.
    */
@@ -374,7 +374,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI015
+   * FII015
    * renderGastos: renderiza la lista de gastos como inputs numéricos
    * y agrega listeners para recalcular totales en tiempo real.
    */
@@ -405,7 +405,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI016
+   * FII016
    * calcularTotales:
    * - totalIngresos = suma de .input-ingreso
    * - totalGastos   = suma de .input-gastos
@@ -445,7 +445,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI017
+   * FII017
    * clickEditarRegistro:
    * - Consulta montos guardados del usuario para la fecha seleccionada
    * - Endpoint: api/gcuenta/cargarDatosUsuario
@@ -480,7 +480,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI018
+   * FII018
    * mostrarCuenta: reutiliza mostrarConceptos() para pintar conceptos con montos devueltos.
    */
   mostrarCuenta(lista){
@@ -488,7 +488,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI019
+   * FII019
    * actualizarDatos: placeholder (no integrado al flujo actual).
    */
   actualizarDatos() {
@@ -500,7 +500,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI020
+   * FII020
    * cargarConceptos: placeholder (no integrado al flujo actual).
    */
   cargarConceptos() {
@@ -508,7 +508,7 @@ class InterfazIngreso {
   }
 
   /**
-   * ICI021
+   * FII021
    * init: placeholder; referencia funciones globales (no métodos this.*).
    */
   init() {
