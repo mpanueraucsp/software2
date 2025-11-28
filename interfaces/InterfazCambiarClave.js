@@ -1,5 +1,5 @@
 /**
- * ICC001
+ * UI-010
  * Interfaz - Clase InterfazCambiarClave.
  * Propósito: cambiar la contraseña del usuario":
  * - actualizar la contraseña
@@ -9,13 +9,13 @@ class InterfazCambiarClave {
   token;     // Token de autenticación
 
   /**
-   * ICC002
+   * FIC-002
    * Constructor: actualmente no inicializa eventos (se deja vacío según tu código).
    */
   constructor() {}
 
   /**
-   * ICC003
+   * FIC-003
    * mostrarPestana: inicializa la pestaña "Cuentas".
    * - Guarda credenciales (usuarioID/token)
    * - Carga la lista inicial de usuarios desde el backend
@@ -30,7 +30,7 @@ class InterfazCambiarClave {
   }
 
   /**
-   * ICC004
+   * FIC004
    * traerUsuarios: petición al backend para obtener el listado de usuarios (API gusuario/mostrarUsuarios).
    * - Si falla, renderiza una lista vacía para evitar errores visuales.
    */

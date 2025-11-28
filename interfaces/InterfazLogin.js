@@ -1,5 +1,5 @@
 /**
- * ICL001
+ * UI-001
  * Interfaz - Clase InterfazLogin.
  * Propósito: gestionar la pantalla de Login:
  * - Capturar submit del formulario

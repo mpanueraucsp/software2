@@ -2,7 +2,7 @@
     require_once 'database.php';
 
     /**
-     * CGU001
+     * G-001
      * Controlador - GUsuario (gusuario.php).
      * Propósito: gestionar operaciones de usuarios:
      * - Validar credenciales (login)
@@ -19,7 +19,7 @@
         public $contrasena;   // Contraseña ingresada (texto plano antes de aplicar hash en BD)
 
         /**
-         * CGU002
+         * FCU002
          * Controlador - Usuario (Login).
          * Se encarga de validar si el usuario existe en la base de datos mediante la función verificarUsuario.
          *
@@ -67,7 +67,7 @@
         }
 
         /**
-         * CGU003
+         * FCU003
          * Controlador - Usuario (Listar usuarios).
          * Se encarga de mostrar el listado de usuarios activos con su perfil, usando la función mostrarUsuarios().
          *
@@ -100,7 +100,7 @@
         }
 
         /**
-         * CGU005
+         * FCU005
          * Controlador - Usuario (Crear usuario).
          * Se encarga de insertar un nuevo usuario en la base de datos.
          *
@@ -155,7 +155,7 @@
         }
 
         /**
-         * CGU005
+         * FCU005
          * Controlador - Usuario (Crear usuario).
          * Se encarga de actualizar la contraseña
          *
