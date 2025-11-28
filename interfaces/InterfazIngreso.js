@@ -9,11 +9,20 @@
  * - Consultar datos guardados (cargarDatosUsuario) para editar
  * - Calcular totales (ingresos, gastos y balance del día)
  * - Mostrar balance mensual/total desde backend
+ *
+ * Mejoras aplicadas:
+ * - Usa la fecha real del input (#fecha) al consultar conceptos.
+ * - Evita enviar inputs "maqueta" (ingreso-monto/gasto-monto) al guardar: toma solo .input-ingreso y .input-gastos
+ * - Maneja tipoconcepto vs tipoconconcepto (robusto)
+ * - Valida resp.ok para evitar error de JSON cuando el server devuelve HTML (404/500)
  */
 class InterfazIngreso {
   usuarioID; // ID del usuario en sesión
   token;     // Token de autenticación
   fecha;     // Fecha seleccionada para trabajar registros diarios
+
+  ingresos = []; // Lista de conceptos tipo ingreso
+  gastos   = []; // Lista de conceptos tipo gasto
 
   /**
    * ICI002
@@ -24,102 +33,121 @@ class InterfazIngreso {
     this.asignarEventos();
   }
 
-  // ICI003
-  // mostrarPestana: inicializa la pestaña "Ingreso diario" con usuario y token.
-  // - Carga conceptos disponibles por periodicidad
-  // - Carga balance para mostrar resumen
+  /**
+   * ICI003
+   * mostrarPestana: inicializa la pestaña "Ingreso diario" con usuario y token.
+   * - Carga conceptos disponibles por periodicidad (según fecha)
+   * - Carga balance para mostrar resumen
+   */
   mostrarPestana(usuarioID, token){
     this.usuarioID = usuarioID;
     this.token = token;
-    this.fecha = "";
-    console.debug(usuarioID, token);
 
-    this.traerConceptos(); // Carga conceptos por fecha/periodicidad
-    this.traerBalance();   // Carga balance (resumen)
+    // ICI003A: importante -> usar la fecha real del input
+    this.fecha = document.getElementById('fecha')?.value || "";
+
+    console.debug("mostrarPestana:", usuarioID, token, "fecha:", this.fecha);
+
+    this.traerConceptos();
+    this.traerBalance();
   }
 
-  ingresos = []; // Lista de conceptos tipo ingreso (tipoconconcepto = 1)
-  gastos = [];   // Lista de conceptos tipo gasto (tipoconconcepto != 1)
-
-  // ICI004
-  // traerConceptos: consume el endpoint que retorna conceptos válidos para la fecha (periodicidad).
-  // Usa api/gconcepto/traerConceptoPorPeriodicidad con usuarioID, token y fecha.
+  /**
+   * ICI004
+   * traerConceptos: consume el endpoint que retorna conceptos válidos para la fecha (periodicidad).
+   * Usa api/gconcepto/traerConceptoPorPeriodicidad con usuarioID, token y fecha.
+   */
   traerConceptos(){
-    console.debug(this.usuarioID, this.token);
+    // ICI004A: sincroniza fecha desde el input antes de consultar
+    this.fecha = document.getElementById('fecha')?.value || this.fecha || "";
 
-    var url = endpoint+`api/gconcepto/traerConceptoPorPeriodicidad/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
-    var scope = this;
+    console.debug("traerConceptos:", this.usuarioID, this.token, "fecha:", this.fecha);
+
+    const url = endpoint +
+      `api/gconcepto/traerConceptoPorPeriodicidad/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(this.fecha)}`;
 
     try {
       fetch(url)
-      .then(resp => {
-        return resp.json();
-      })
-      .then(data => {
-        console.debug(data);
-        scope.mostrarConceptos(data); // Separa conceptos y renderiza inputs
-      })
-      .catch(err => console.error("Error:", err));
-
+        .then(async (resp) => {
+          // ICI004B: evita fallar al parsear JSON si la respuesta es HTML por error
+          if (!resp.ok) {
+            const txt = await resp.text();
+            throw new Error(`HTTP ${resp.status} - ${txt.slice(0, 140)}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          console.debug("conceptos:", data);
+          this.mostrarConceptos(data);
+        })
+        .catch(err => console.error("Error traerConceptos:", err));
     } catch (error) {
       console.error('Error:', error);
       alert('No se pudo conectar con el servidor.');
     }
   }
 
-  // ICI005
-  // mostrarConceptos: separa los conceptos recibidos en ingresos y gastos y actualiza la UI.
-  // - Luego renderiza inputs y calcula totales.
+  /**
+   * ICI005
+   * mostrarConceptos: separa los conceptos recibidos en ingresos y gastos y actualiza la UI.
+   * - Luego renderiza inputs y calcula totales.
+   */
   mostrarConceptos(data){
     this.ingresos = [];
     this.gastos = [];
 
-    for (const item of data) {
-      console.debug(item.tipoconcepto);
+    const lista = Array.isArray(data) ? data : [];
 
-      // Tipo 1 => ingreso; cualquier otro => gasto (según tu lógica)
-      if (item.tipoconconcepto=="1"){
-        console.debug("ingresos");
+    for (const item of lista) {
+      // ICI005A: robusto: puede venir tipoconcepto o tipoconconcepto
+      const tipo = String(item.tipoconconcepto ?? item.tipoconcepto ?? "");
+
+      if (tipo === "1") {
         this.ingresos.push(item);
       } else {
         this.gastos.push(item);
       }
     }
 
-    console.debug(this.ingresos);
-    console.debug(this.gastos);
+    console.debug("ingresos:", this.ingresos);
+    console.debug("gastos:", this.gastos);
 
-    this.renderIngresos();    // Dibuja lista de ingresos
-    this.renderGastos();      // Dibuja lista de gastos
-    this.calcularTotales();   // Totaliza valores actuales en inputs
+    this.renderIngresos();
+    this.renderGastos();
+    this.calcularTotales();
   }
 
-  // ICI006
-  // colocarFechaActual: inicializa el input de fecha con hoy y guarda this.fecha.
+  /**
+   * ICI006
+   * colocarFechaActual: inicializa el input de fecha con hoy y guarda this.fecha.
+   */
   colocarFechaActual() {
+    const input = document.getElementById('fecha');
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('fecha').value = today;
+
+    if (input) input.value = today;
     this.fecha = today;
   }
 
-  // ICI007
-  // clickActualizar: recolecta los montos ingresados y envía el payload hacia el backend (guardarDatos).
-  // - Lee todos los inputs numéricos (ingresos y gastos)
-  // - Construye payload { datos: [...] }
-  // - Envía por POST a api/gcuenta/enviarDatos con parámetro "datos" en querystring
-  // - Si success: muestra mensaje y refresca balance
+  /**
+   * ICI007
+   * clickActualizar: recolecta los montos ingresados y envía el payload hacia el backend (guardarDatos).
+   * - Lee solo inputs dinámicos (.input-ingreso y .input-gastos)
+   * - Construye payload { datos: [...] }
+   * - Envía por POST a api/gcuenta/enviarDatos con parámetro "datos" en querystring
+   * - Si success: muestra mensaje y refresca balance
+   */
   clickActualizar(e){
     const usuarioID = this.usuarioID;
-    const fecha = document.getElementById('fecha').value;
+    const fecha = document.getElementById('fecha')?.value || this.fecha || "";
 
-    // Obtener todos los inputs number (ingresos y gastos)
-    const inputs = document.querySelectorAll('input[type="number"]');
+    // ICI007A: IMPORTANTE -> solo inputs dinámicos (no maqueta)
+    const inputs = document.querySelectorAll('.input-ingreso, .input-gastos');
 
     // Construir arreglo de registros (solo los que tengan monto != 0)
     const datos = Array.from(inputs).map(input => {
-      console.debug(input);
-      const concepto_id = input.name;                      // conceptoid en el atributo name
-      const monto = parseFloat(input.value) || 0;          // monto numérico
+      const concepto_id = input.name;             // conceptoid en el atributo name
+      const monto = parseFloat(input.value) || 0; // monto numérico
       return {
         fecha: fecha,
         usuario_id: usuarioID,
@@ -128,93 +156,139 @@ class InterfazIngreso {
       };
     }).filter(item => item.monto !== 0);
 
-    // Payload final esperado por la función guardarDatos (jsonb)
-    const payload = { datos: datos };
+    const payload = { datos };
 
     console.log('Enviando:', payload);
 
-    var base = endpoint+`api/gcuenta/enviarDatos/`;
+    const base = endpoint + `api/gcuenta/enviarDatos/`;
     const qs = new URLSearchParams();
-    qs.set('datos', JSON.stringify(payload)); // Encodifica el JSON en querystring
+    qs.set('datos', JSON.stringify(payload));
 
     fetch(`${base}?${qs.toString()}`, {
       method: 'POST',
       headers: { 'Accept': 'application/json' }
     })
-    .then(resp => resp.json())
-    .then(data => {
-        console.debug(data.success)
-        if (data.success){
+      .then(async (resp) => {
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`HTTP ${resp.status} - ${txt.slice(0, 140)}`);
+        }
+        return resp.json();
+      })
+      .then(data => {
+        console.debug("respuesta enviarDatos:", data);
+
+        if (data?.success){
           this.mostrarMensaje("Los datos se guardaron satisfactoriamente");
-          this.traerBalance(); // Refresca balance para reflejar cambios
+
+          // Refrescos (balance y conceptos por si cambian montos/estado)
+          this.traerBalance();
+          // opcional: si quieres recargar conceptos también:
+          // this.traerConceptos();
+        } else {
+          this.mostrarMensaje("No se pudo guardar. Revisa la consola / backend.");
         }
       })
-    .catch(err => console.error('Error al enviar datos:', err));
+      .catch(err => console.error('Error al enviar datos:', err));
   }
 
-  // ICI008
-  // mostrarMensaje: muestra un mensaje simple al usuario (alert).
+  /**
+   * ICI008
+   * mostrarMensaje: muestra un mensaje simple al usuario (alert).
+   */
   mostrarMensaje(mensaje){
     alert(mensaje);
   }
 
-  // ICI009
-  // traerBalance: consulta el balance del usuario al backend y actualiza la UI con mostrarBalance().
+  /**
+   * ICI009
+   * traerBalance: consulta el balance del usuario al backend y actualiza la UI con mostrarBalance().
+   */
   traerBalance(){
-    var url = endpoint+`api/gbalance/traerBalance/?usuarioID=${encodeURIComponent(this.usuarioID)}`;
-    var scope = this;
+    const url = endpoint + `api/gbalance/traerBalance/?usuarioID=${encodeURIComponent(this.usuarioID)}`;
 
     try {
       fetch(url)
-      .then(resp => {
-        return resp.json();
-      })
-      .then(data => {
-        console.debug(data);
-        this.mostrarBalance(data.lista); // Pinta los totales en pantalla
-      })
-      .catch(err => console.error("Error:", err));
-
+        .then(async (resp) => {
+          if (!resp.ok) {
+            const txt = await resp.text();
+            throw new Error(`HTTP ${resp.status} - ${txt.slice(0, 140)}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          console.debug("balance:", data);
+          this.mostrarBalance(data.lista);
+        })
+        .catch(err => console.error("Error traerBalance:", err));
     } catch (error) {
       console.error('Error:', error);
       alert('No se pudo conectar con el servidor.');
     }
   }
 
-  // ICI010
-  // mostrarBalance: muestra el total mensual/total general en el componente #total-general.
-  // Nota: el código usa lista.total_mensual (según tu implementación).
+  /**
+   * ICI010
+   * mostrarBalance: muestra el total mensual/total general en #total-general.
+   * Nota: el código usa lista.total_mensual (según tu implementación).
+   */
   mostrarBalance(lista){
     const totalGeneral = document.getElementById('total-general');
-    totalGeneral.innerText = lista.total_mensual;
+    if (!totalGeneral) return;
+
+    // ICI010A: fallback por si cambia el nombre del campo
+    const valor = (lista?.total_mensual ?? lista?.total_general ?? lista?.total ?? 0);
+    totalGeneral.innerText = valor;
   }
 
-  // ICI011
-  // asignarEventos: asigna eventos principales de la vista:
-  // - .btn-update => guardar/actualizar datos (clickActualizar)
-  // - .btn-edit   => cargar datos guardados del día (clickEditarRegistro)
+  /**
+   * ICI011
+   * asignarEventos:
+   * - .btn-update => clickActualizar
+   * - .btn-edit   => clickEditarRegistro
+   *
+   * Nota:
+   * - Si tu página se inyecta dinámicamente (SPA), este constructor debe ejecutarse
+   *   después de que el HTML esté en el DOM, o los querySelector pueden dar null.
+   */
   asignarEventos() {
-    const btn = document.querySelector('.btn-update');
-    if (btn) {
-      btn.addEventListener('click', (e) => this.clickActualizar(e));
+    const btnUpdate = document.querySelector('.btn-update');
+    if (btnUpdate) {
+      btnUpdate.addEventListener('click', (e) => this.clickActualizar(e));
     } else {
-      console.warn(" No se encontró el botón .btn-update en el DOM");
+      console.warn("No se encontró el botón .btn-update en el DOM");
     }
 
-    const btn1 = document.querySelector('.btn-edit');
-    console.debug("entro a asignar eventos", btn1);
-    if (btn1) {
-      btn1.addEventListener('click', (e) => this.clickEditarRegistro(e));
+    const btnEdit = document.querySelector('.btn-edit');
+    if (btnEdit) {
+      btnEdit.addEventListener('click', (e) => this.clickEditarRegistro(e));
     } else {
-      console.warn(" No se encontró el botón .btn-update en el DOM");
+      console.warn("No se encontró el botón .btn-edit en el DOM");
+    }
+
+    // ICI011A: si el usuario cambia la fecha, recalcular conceptos y limpiar montos si quieres
+    const inputFecha = document.getElementById('fecha');
+    if (inputFecha) {
+      inputFecha.addEventListener('change', () => {
+        this.fecha = inputFecha.value;
+        this.traerConceptos();
+        // opcional: recalcula totales (si hay valores ya escritos)
+        this.calcularTotales();
+      });
     }
   }
 
-  // ICI012
-  // setupIngresoListener: listener alternativo (no usado por el flujo actual de inputs dinámicos).
-  // - Escucha cambios en #ingreso-monto para agregar a una lista "ingresos" (variables globales en este bloque).
+  /**
+   * ICI012
+   * setupIngresoListener: listener alternativo (no usado por el flujo actual).
+   * Nota: Este bloque usa variables globales (ingresos/renderIngresos/calcularTotales) y
+   * no métodos this.*. Se deja como legado/no recomendado.
+   */
   setupIngresoListener() {
-    document.getElementById('ingreso-monto').addEventListener('change', function() {
+    const el = document.getElementById('ingreso-monto');
+    if (!el) return;
+
+    el.addEventListener('change', function() {
       const concepto = document.getElementById('ingreso-concepto').value;
       const monto = parseFloat(this.value);
 
@@ -224,7 +298,6 @@ class InterfazIngreso {
         if (conceptoTexto !== 'Nuevo') {
           ingresos.push({ concepto: conceptoTexto, monto: monto });
 
-          // Limpiar campos
           document.getElementById('ingreso-concepto').value = '';
           this.value = '';
 
@@ -238,10 +311,15 @@ class InterfazIngreso {
     });
   }
 
-  // ICI013
-  // setupGastoListener: listener alternativo (no usado por el flujo actual de inputs dinámicos).
+  /**
+   * ICI013
+   * setupGastoListener: listener alternativo (no usado por el flujo actual).
+   */
   setupGastoListener() {
-    document.getElementById('gasto-monto').addEventListener('change', function() {
+    const el = document.getElementById('gasto-monto');
+    if (!el) return;
+
+    el.addEventListener('change', function() {
       const concepto = document.getElementById('gasto-concepto').value;
       const monto = parseFloat(this.value);
 
@@ -251,7 +329,6 @@ class InterfazIngreso {
         if (conceptoTexto !== 'Nuevo') {
           gastos.push({ concepto: conceptoTexto, monto: monto });
 
-          // Limpiar campos
           document.getElementById('gasto-concepto').value = '';
           this.value = '';
 
@@ -265,20 +342,23 @@ class InterfazIngreso {
     });
   }
 
-  // ICI014
-  // renderIngresos: renderiza la lista de ingresos como inputs numéricos y agrega listeners de totalización.
+  /**
+   * ICI014
+   * renderIngresos: renderiza la lista de ingresos como inputs numéricos
+   * y agrega listeners para recalcular totales en tiempo real.
+   */
   renderIngresos() {
     const list = document.getElementById('ingresos-list');
+    if (!list) return;
 
-    // Genera HTML con inputs; name = conceptoid
     list.innerHTML = this.ingresos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
         <span class="item-amount">
-          <input 
-            type="number" 
-            name="${item.conceptoid}" 
-            value="${item.monto || ''}" 
+          <input
+            type="number"
+            name="${item.conceptoid}"
+            value="${item.monto ?? ''}"
             class="input-ingreso"
             min="0"
             step="0.01"
@@ -287,26 +367,29 @@ class InterfazIngreso {
       </div>
     `).join('');
 
-    // Agregar eventos input para recalcular totales en tiempo real
     const inputs = list.querySelectorAll('.input-ingreso');
     inputs.forEach(input => {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
 
-  // ICI015
-  // renderGastos: renderiza la lista de gastos como inputs numéricos y agrega listeners de totalización.
+  /**
+   * ICI015
+   * renderGastos: renderiza la lista de gastos como inputs numéricos
+   * y agrega listeners para recalcular totales en tiempo real.
+   */
   renderGastos() {
     const list = document.getElementById('gastos-list');
+    if (!list) return;
 
     list.innerHTML = this.gastos.map(item => `
       <div class="item">
         <span class="item-name">${item.nombre}</span>
         <span class="item-amount">
-          <input 
-            type="number" 
-            name="${item.conceptoid}" 
-            value="${item.monto || ''}" 
+          <input
+            type="number"
+            name="${item.conceptoid}"
+            value="${item.monto ?? ''}"
             class="input-gastos"
             min="0"
             step="0.01"
@@ -315,104 +398,123 @@ class InterfazIngreso {
       </div>
     `).join('');
 
-    // Agregar eventos input para recalcular totales en tiempo real
     const inputs = list.querySelectorAll('.input-gastos');
     inputs.forEach(input => {
       input.addEventListener('input', () => this.calcularTotales());
     });
   }
 
-  // ICI016
-  // calcularTotales: suma ingresos y gastos desde los inputs actuales y actualiza la UI.
-  // - totalIngresos = suma de .input-ingreso
-  // - totalGastos   = suma de .input-gastos
-  // - totalGeneral  = ingresos - gastos
-  // Actualiza: #total-ingresos, #total-gastos y #gasto-hoy
+  /**
+   * ICI016
+   * calcularTotales:
+   * - totalIngresos = suma de .input-ingreso
+   * - totalGastos   = suma de .input-gastos
+   * - balanceDia    = ingresos - gastos
+   *
+   * Actualiza:
+   * - #total-ingresos
+   * - #total-gastos
+   * - #gasto-hoy (balance del día)
+   */
   calcularTotales() {
-    const inputs = document.querySelectorAll('.input-ingreso');
-    var total = 0;
-    var totalGastos = 0;
+    const inputsIng = document.querySelectorAll('.input-ingreso');
+    const inputsGas = document.querySelectorAll('.input-gastos');
 
-    inputs.forEach(inp => {
+    let totalIngresos = 0;
+    let totalGastos = 0;
+
+    inputsIng.forEach(inp => {
       const val = parseFloat(inp.value);
-      if (!isNaN(val)) total += val;
+      if (!isNaN(val)) totalIngresos += val;
     });
 
-    const gastos = document.querySelectorAll('.input-gastos');
-    gastos.forEach(inp => {
+    inputsGas.forEach(inp => {
       const val = parseFloat(inp.value);
       if (!isNaN(val)) totalGastos += val;
     });
 
-    const totalIngresos = total;
-    const totalGeneral = totalIngresos - totalGastos;
+    const balanceDia = totalIngresos - totalGastos;
 
-    document.getElementById('total-ingresos').textContent = totalIngresos.toFixed(2);
-    document.getElementById('total-gastos').textContent = totalGastos.toFixed(2);
-    document.getElementById('gasto-hoy').textContent = totalGeneral.toFixed(2)||0.00;
+    const elIng = document.getElementById('total-ingresos');
+    const elGas = document.getElementById('total-gastos');
+    const elBal = document.getElementById('gasto-hoy');
+
+    if (elIng) elIng.textContent = totalIngresos.toFixed(2);
+    if (elGas) elGas.textContent = totalGastos.toFixed(2);
+    if (elBal) elBal.textContent = balanceDia.toFixed(2);
   }
 
-  // ICI017
-  // clickEditarRegistro: consulta los montos guardados del usuario para la fecha seleccionada
-  // y vuelve a renderizar la vista con mostrarCuenta().
+  /**
+   * ICI017
+   * clickEditarRegistro:
+   * - Consulta montos guardados del usuario para la fecha seleccionada
+   * - Endpoint: api/gcuenta/cargarDatosUsuario
+   * - Luego reutiliza mostrarCuenta() -> mostrarConceptos()
+   */
   clickEditarRegistro() {
-    const fecha = document.getElementById('fecha').value;
-    console.debug(this.usuarioID, this.token);
+    const fecha = document.getElementById('fecha')?.value || this.fecha || "";
 
-    // Endpoint que retorna conceptos con monto cargado (obtenerCuentaUsuario)
-    var url = endpoint+`api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(fecha)}`;
-    var scope = this;
+    console.debug("editarRegistro:", this.usuarioID, this.token, "fecha:", fecha);
+
+    const url = endpoint +
+      `api/gcuenta/cargarDatosUsuario/?usuarioID=${encodeURIComponent(this.usuarioID)}&token=${encodeURIComponent(this.token)}&fecha=${encodeURIComponent(fecha)}`;
 
     try {
       fetch(url)
-      .then(resp => {
-        return resp.json();
-      })
-      .then(data => {
-        console.debug(data);
-        scope.mostrarCuenta(data); // Renderiza conceptos con montos existentes
-      })
-      .catch(err => console.error("Error:", err));
-
+        .then(async (resp) => {
+          if (!resp.ok) {
+            const txt = await resp.text();
+            throw new Error(`HTTP ${resp.status} - ${txt.slice(0, 140)}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          console.debug("datos usuario:", data);
+          this.mostrarCuenta(data);
+        })
+        .catch(err => console.error("Error clickEditarRegistro:", err));
     } catch (error) {
       console.error('Error:', error);
       alert('No se pudo conectar con el servidor.');
     }
   }
 
-  // ICI018
-  // mostrarCuenta: reutiliza mostrarConceptos() para pintar conceptos con montos devueltos.
+  /**
+   * ICI018
+   * mostrarCuenta: reutiliza mostrarConceptos() para pintar conceptos con montos devueltos.
+   */
   mostrarCuenta(lista){
-    this.mostrarConceptos(lista)
+    this.mostrarConceptos(lista);
   }
 
-  // ICI019
-  // actualizarDatos: función placeholder (no integrada al flujo actual).
+  /**
+   * ICI019
+   * actualizarDatos: placeholder (no integrado al flujo actual).
+   */
   actualizarDatos() {
     const fecha = document.getElementById('fecha').value;
-    const datos = {
-      fecha: fecha,
-      ingresos: ingresos,
-      gastos: gastos
-    };
+    const datos = { fecha, ingresos, gastos };
 
     alert('Guardar datos en la base de datos');
     console.log('Datos a guardar:', datos);
   }
 
-  // ICI020
-  // cargarConceptos: función placeholder (no integrada al flujo actual).
+  /**
+   * ICI020
+   * cargarConceptos: placeholder (no integrado al flujo actual).
+   */
   cargarConceptos() {
     console.log('Cargar conceptos desde BD');
   }
 
-  // ICI021
-  // init: función placeholder; referencia funciones globales (no métodos this.*).
+  /**
+   * ICI021
+   * init: placeholder; referencia funciones globales (no métodos this.*).
+   */
   init() {
     inicializarFecha();
     setupIngresoListener();
     setupGastoListener();
     cargarConceptos();
   }
-
 }

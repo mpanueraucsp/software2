@@ -13,35 +13,6 @@
 
 <style>
   /* ==========================================================================
-     PGR002 - Barra superior (Top Bar)
-     - Contenedor para ubicar el botón "Atrás" alineado a la derecha.
-     - padding superior para separarlo del borde de la página.
-     ========================================================================== */
-  .top-bar {
-    display: flex;
-    justify-content: flex-end;  /* coloca el contenido al extremo derecho */
-    padding: 16px 20px 0;
-  }
-
-  /* ==========================================================================
-     PGR003 - Botón "Atrás"
-     - Estilo tipo "pill" (redondeado).
-     - Colores oscuros para buen contraste.
-     - Hover: baja levemente la opacidad.
-     ========================================================================== */
-  .btn-back {
-    border: none;
-    background: #111827;
-    color: #f9fafb;
-    padding: 10px 18px;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .btn-back:hover { opacity: 0.92; }
-
-  /* ==========================================================================
      PGR004 - Contenedor principal (Main)
      - Da espacio interno (padding) a la pantalla.
      - max-width limita el ancho para que se vea tipo "dashboard" centrado.
@@ -155,14 +126,6 @@
     }
   }
 </style>
-
-<!--
-  PGR014 - Barra superior con botón Atrás
-  - window.history.back() regresa a la página anterior del navegador.
--->
-<div class="top-bar">
-  <button class="btn-back" onclick="window.history.back()">Atrás</button>
-</div>
 
 <div class="main">
   <!-- PGR015 - Título de la vista -->

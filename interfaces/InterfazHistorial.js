@@ -1,221 +1,521 @@
 /**
  * ICH001
- * Interfaz - Clase InterfazHistorial.
- * Propósito: gestionar la vista de Historial:
- * - Colocar rango de fechas por defecto (inicio de mes → hoy)
- * - Consultar historial al backend (por usuario y rango)
- * - Renderizar tabla de movimientos y total acumulado
+ * Interfaz - Clase InterfazHistorial
+ *
+ * Propósito:
+ * - Consultar el historial al backend por rango de fechas (fecha-inicio → fecha-fin).
+ * - Guardar la data “cruda” (listaBase) y generar una “vista” (listaVista) aplicando filtros locales.
+ * - Renderizar tabla, contador de movimientos y total neto (Ingresos - Gastos).
+ * - Permitir exportación CSV local desde lo que se está viendo.
+ *
+ * Convención de IDs:
+ * - ICH0xx: Identificadores de documentación por bloque/método para trazabilidad.
  */
 class InterfazHistorial {
   token;       // Token de autenticación
-  tipoUsuario; // Rol/perfil del usuario
-  usuario;     // Usuario seleccionado / usuario actual
+  tipoUsuario; // Rol del usuario (si aplica para permisos/visibilidad)
+  usuario;     // Usuario objetivo (usuario actual o seleccionado)
 
   /**
    * ICH002
-   * Constructor: inicializa la interfaz y asigna eventos base.
+   * Constructor
+   * - Inicializa estructuras base para el flujo:
+   *   listaBase : data cruda traída del backend (sin filtros locales).
+   *   listaVista: data luego de aplicar filtros UI (lo que el usuario ve).
+   * - Registra listeners globales (click/input/change).
    */
   constructor() {
+    this.listaBase = [];
+    this.listaVista = [];
     this.asignarEventosBase();
   }
 
-  /*
-    ICH003
-    mostrarPestana: inicializa la pestaña de Historial con usuario/token/tipoUsuario.
-    - Coloca fechas por defecto
-    - Trae el historial con el rango inicial
-  */
-  mostrarPestana(usuario, token, tipoUsuario){
-    this.token = token;              // Guarda token
-    this.tipoUsuario = tipoUsuario;  // Guarda rol
-    this.usuario = usuario;          // Guarda usuario objetivo
-    this.colocarFechaActual();       // Setea rango de fechas por defecto
-    this.traerHistorial();           // Consulta historial al backend
+  /**
+   * ICH003
+   * mostrarPestana(usuario, token, tipoUsuario)
+   * - Inicializa el estado para operar la pestaña de Historial.
+   * - Setea fechas por defecto (inicio del mes → hoy).
+   * - Ejecuta la primera consulta al backend.
+   */
+  mostrarPestana(usuario, token, tipoUsuario) {
+    this.token = token;
+    this.tipoUsuario = tipoUsuario;
+    this.usuario = usuario;
+
+    this.colocarFechaActual();
+    this.traerHistorial();
   }
 
-  /*
-    ICH004
-    colocarFechaActual: llena los inputs de fechas (inicio y fin) con:
-    - fecha-inicio = primer día del mes actual
-    - fecha-fin    = hoy
-  */
-  colocarFechaActual(){
-    const inputFechaInicio = document.getElementById('fecha-inicio');
-    const inputFechaFin = document.getElementById('fecha-fin');
+  /**
+   * ICH004
+   * colocarFechaActual()
+   * - Llena #fecha-inicio con el primer día del mes actual.
+   * - Llena #fecha-fin con la fecha actual (hoy).
+   * - Formato requerido por <input type="date">: YYYY-MM-DD
+   */
+  colocarFechaActual() {
+    const inputInicio = document.getElementById("fecha-inicio");
+    const inputFin = document.getElementById("fecha-fin");
+    if (!inputInicio || !inputFin) return;
 
-    if (!inputFechaInicio || !inputFechaFin) return;
-
-    // Obtener fecha actual
     const hoy = new Date();
 
-    // Primer día del mes actual (YYYY-MM-DD)
     const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
       .toISOString()
-      .split('T')[0];
+      .split("T")[0];
 
-    // Fecha de hoy (YYYY-MM-DD)
-    const hoyFormateado = hoy.toISOString().split('T')[0];
+    const hoyFormateado = hoy.toISOString().split("T")[0];
 
-    // Asignar valores por defecto
-    inputFechaInicio.value = primerDiaMes;
-    inputFechaFin.value = hoyFormateado;
+    inputInicio.value = primerDiaMes;
+    inputFin.value = hoyFormateado;
   }
 
-  /*
-    ICH005
-    traerHistorial: consulta al backend el historial de movimientos según:
-    - usuarioID (this.usuario)
-    - fechainicio (#fecha-inicio)
-    - fechafin    (#fecha-fin)
-    Al recibir la respuesta, renderiza la tabla.
-  */
-  traerHistorial(){
-      var scope = this;
+  /**
+   * ICH005
+   * traerHistorial()
+   * - Consulta al backend usando:
+   *   token, usuarioID, fechainicio (#fecha-inicio) y fechafin (#fecha-fin).
+   * - Guarda resultados en listaBase.
+   * - Actualiza filtros dinámicos (concepto/usuario) en base a listaBase.
+   * - Aplica filtros UI actuales y renderiza.
+   */
+  async traerHistorial() {
+    const ofechainicio = document.getElementById("fecha-inicio");
+    const ofechafin = document.getElementById("fecha-fin");
 
-      console.debug(this.usuario);
+    const fechainicio = ofechainicio?.value || "";
+    const fechafin = ofechafin?.value || "";
 
-      // Tomar fechas del DOM
-      var ofechainicio = document.getElementById('fecha-inicio');
-      var ofechafin = document.getElementById('fecha-fin');
-      var fechainicio = ofechainicio.value;
-      var fechafin = ofechafin.value;
+    const url =
+      endpoint +
+      `api/gbalance/traerHistorial/?token=${encodeURIComponent(this.token)}&usuarioID=${encodeURIComponent(
+        this.usuario
+      )}&fechainicio=${encodeURIComponent(fechainicio)}&fechafin=${encodeURIComponent(fechafin)}`;
 
-      // Endpoint API: gbalance/traerHistorial
-      var url = endpoint+`api/gbalance/traerHistorial/?token=${encodeURIComponent(this.token)}&usuarioID=${encodeURIComponent(this.usuario)}&fechainicio=${encodeURIComponent(fechainicio)}&fechafin=${encodeURIComponent(fechafin)}`;
+    try {
+      const resp = await fetch(url);
 
-      try {
-        fetch(url)
-        .then(resp => {
-          return resp.json();
-        })
-        .then(lista => {
-          console.debug(lista);
-          scope.mostrarDatosHistorial(lista); // Renderiza tabla y totales
-        })
-        .catch(err => console.error("Error:", err));
-
-      } catch (error) {
-        console.error('Error:', error);
-        alert('No se pudo conectar con el servidor.');
+      // ICH006: Validación para evitar errores de JSON cuando el server devuelve HTML o error.
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`HTTP ${resp.status} - ${txt.slice(0, 140)}`);
       }
+
+      const data = await resp.json();
+
+      // ICH007: Compatibilidad con backend:
+      // - { lista: [...] }  o  [...]
+      const lista = Array.isArray(data?.lista) ? data.lista : Array.isArray(data) ? data : [];
+
+      this.listaBase = lista;
+
+      this.actualizarFiltrosDinamicos();
+      this.aplicarFiltrosUI();
+    } catch (error) {
+      console.error("Error al traer historial:", error);
+      alert("No se pudo obtener el historial. Revisa consola (F12) y el endpoint.");
+    }
   }
 
-  /*
-    ICH006
-    mostrarDatosHistorial: renderiza la tabla del historial usando data.lista.
-    - Si no hay resultados, muestra "Sin resultados"
-    - Calcula total acumulado (tipoConcepto * monto)
-    - Actualiza #text-total y #title-movimientos
-  */
-  mostrarDatosHistorial(data){
-      const tbody = document.querySelector(".history-table tbody");
+  // =========================
+  // FILTROS UI (Frontend)
+  // =========================
 
-      // Limpia el contenido actual
-      tbody.innerHTML = "";
+  /**
+   * ICH008
+   * aplicarFiltrosUI()
+   * - Lee valores actuales del panel de filtros.
+   * - Filtra, busca, aplica rango de montos y orden.
+   * - Actualiza listaVista y luego manda a renderTabla().
+   *
+   * Importante:
+   * - Estos filtros NO vuelven a consultar al backend.
+   * - La consulta al backend solo ocurre con "Filtrar" (btn-filter) y con "Limpiar" (reinicio).
+   */
+  aplicarFiltrosUI() {
+    const tipo = document.getElementById("tipo-filtro")?.value || "todo";
+    const concepto = document.getElementById("concepto-filtro")?.value || "todo";
+    const usuario = document.getElementById("usuario-filtro")?.value || "todo";
+    const q = (document.getElementById("q")?.value || "").trim().toLowerCase();
 
-      // Si no hay datos
-      if (!data.lista || data.lista.length === 0) {
-        tbody.innerHTML = `
-          <tr><td colspan="6" style="text-align:center;">Sin resultados</td></tr>
-        `;
-        return;
-      }
+    const montoMinRaw = document.getElementById("monto-min")?.value;
+    const montoMaxRaw = document.getElementById("monto-max")?.value;
+    const montoMin = montoMinRaw === "" || montoMinRaw == null ? NaN : Number(montoMinRaw);
+    const montoMax = montoMaxRaw === "" || montoMaxRaw == null ? NaN : Number(montoMaxRaw);
 
-      var total = 0.00;
+    const orden = document.getElementById("orden")?.value || "fecha_desc";
 
-      data.lista.forEach(item => {
-            // Formateo de fecha a DD/MM/YYYY
-            const fecha = this.formatearFechaYYYYMMDD(item.fecha);
+    let lista = [...this.listaBase];
 
-            // Conversión de tipo (Ingreso/Gasto)
-            const tipoTexto = this.convertirTipo(item.tipoconconcepto);
+    // ICH009: Filtro por tipo (Ingreso/Gasto) en base a tipoconconcepto del backend.
+    if (tipo !== "todo") {
+      const wantIngreso = tipo === "ingresos";
+      lista = lista.filter((it) => this.esIngreso(it.tipoconconcepto) === wantIngreso);
+    }
 
-            // Acumula total (ingreso suma, gasto resta)
-            total += item.tipoconconcepto * item.monto;
+    // ICH010: Filtro exacto por concepto (select).
+    if (concepto !== "todo") {
+      lista = lista.filter((it) => String(it.concepto ?? "") === concepto);
+    }
 
-            // Crear fila de tabla
-            const tr = document.createElement("tr");
+    // ICH011: Filtro exacto por usuario (select).
+    if (usuario !== "todo") {
+      lista = lista.filter((it) => String(it.usuario ?? "") === usuario);
+    }
 
-            tr.innerHTML = `
-              <td>${item.id}</td>
-              <td>${fecha}</td>
-              <td>${item.concepto}</td>
-              <td>${tipoTexto}</td>
-              <td>${item.usuario}</td>
-              <td>${parseFloat(item.monto).toFixed(2)}</td>
-        `;
-
-        tbody.appendChild(tr);
+    // ICH012: Búsqueda libre (id / concepto / usuario).
+    if (q) {
+      lista = lista.filter((it) => {
+        const id = String(it.id ?? "").toLowerCase();
+        const con = String(it.concepto ?? "").toLowerCase();
+        const usu = String(it.usuario ?? "").toLowerCase();
+        return id.includes(q) || con.includes(q) || usu.includes(q);
       });
+    }
 
-      // Actualizar total en input #text-total
-      var oTotal = document.getElementById('text-total');
-      console.debug(oTotal, total);
-      oTotal.value = total;
+    // ICH013: Filtros por monto min/max (monto del registro, no neto).
+    if (!Number.isNaN(montoMin)) {
+      lista = lista.filter((it) => this.toNumber(it.monto) >= montoMin);
+    }
+    if (!Number.isNaN(montoMax)) {
+      lista = lista.filter((it) => this.toNumber(it.monto) <= montoMax);
+    }
 
-      // Actualizar contador de movimientos en el título
-      var oMovimientos = document.getElementById('title-movimientos');
-      oMovimientos.innerHTML = data.lista.length+" MOVIMIENTOS";
+    // ICH014: Ordenamiento (fecha/monto asc/desc).
+    const toTime = (f) => {
+      const s = String(f ?? "");
+      const d = new Date(s);
+      if (!Number.isNaN(d.getTime())) return d.getTime();
+
+      // fallback para YYYY-MM-DD
+      const p = s.split("-");
+      if (p.length === 3) return new Date(`${p[0]}-${p[1]}-${p[2]}T00:00:00`).getTime();
+      return 0;
+    };
+
+    const toMonto = (m) => this.toNumber(m);
+
+    switch (orden) {
+      case "fecha_asc":
+        lista.sort((a, b) => toTime(a.fecha) - toTime(b.fecha));
+        break;
+      case "fecha_desc":
+        lista.sort((a, b) => toTime(b.fecha) - toTime(a.fecha));
+        break;
+      case "monto_asc":
+        lista.sort((a, b) => toMonto(a.monto) - toMonto(b.monto));
+        break;
+      case "monto_desc":
+        lista.sort((a, b) => toMonto(b.monto) - toMonto(a.monto));
+        break;
+    }
+
+    this.listaVista = lista;
+    this.renderTabla(lista);
   }
 
-  /*
-    ICH007
-    formatearFechaYYYYMMDD: convierte YYYY-MM-DD a DD/MM/YYYY.
-  */
-  formatearFechaYYYYMMDD(f) {
-      const partes = f.split("-"); // [YYYY, MM, DD]
-      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  // =========================
+  // RENDER
+  // =========================
+
+  /**
+   * ICH015
+   * renderTabla(lista)
+   * - Inserta filas (<tr>) en .history-table tbody.
+   * - Calcula el total neto (Ingresos - Gastos) basado en tipoconconcepto.
+   * - Si no hay datos, muestra "Sin resultados" y total = 0.
+   */
+  renderTabla(lista) {
+    const tbody = document.querySelector(".history-table tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (!lista || lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Sin resultados</td></tr>`;
+      this.actualizarResumen(0, 0);
+      return;
+    }
+
+    let totalNeto = 0;
+
+    for (const item of lista) {
+      const fecha = this.formatearFecha(item.fecha);
+      const tipoTexto = this.convertirTipo(item.tipoconconcepto);
+      const monto = this.toNumber(item.monto);
+
+      // ICH016: Neto: ingreso suma, gasto resta (factorTipo -> +1 o -1).
+      totalNeto += this.factorTipo(item.tipoconconcepto) * monto;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${this.escapeHtml(item.id ?? "")}</td>
+        <td>${this.escapeHtml(fecha)}</td>
+        <td>${this.escapeHtml(item.concepto ?? "")}</td>
+        <td>${this.escapeHtml(tipoTexto)}</td>
+        <td>${this.escapeHtml(item.usuario ?? "")}</td>
+        <td>${monto.toFixed(2)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    this.actualizarResumen(totalNeto, lista.length);
   }
 
-  /*
-    ICH008
-    convertirPeriodicidad: convierte un código de periodicidad a texto.
-    Nota: actualmente no se utiliza en el render (se mantiene por utilidad).
-  */
-  convertirPeriodicidad(valor) {
-      switch (valor) {
-        case "1": return "Diario";
-        case "2": return "Semanal";
-        case "3": return "Mensual";
-        case "4": return "Anual";
-        default: return "Sin definir";
-      }
+  /**
+   * ICH017
+   * actualizarResumen(totalNeto, cantidad)
+   * - Actualiza el input #text-total con el total neto.
+   * - Actualiza #title-movimientos con la cantidad de movimientos renderizados.
+   */
+  actualizarResumen(totalNeto, cantidad) {
+    const oTotal = document.getElementById("text-total");
+    if (oTotal) oTotal.value = Number(totalNeto).toFixed(2);
+
+    const oMov = document.getElementById("title-movimientos");
+    if (oMov) oMov.textContent = `${cantidad} MOVIMIENTOS`;
   }
 
-  /*
-    ICH009
-    convertirTipo: convierte tipoconconcepto (1 / -1) a texto (Ingreso / Gasto).
-  */
-  convertirTipo(valor) {
-      switch (valor) {
-        case "1": return "Ingreso";
-        case "-1": return "Gasto";
-        default: return "Sin definir";
-      }
+  // =========================
+  // SELECTS DINÁMICOS (Concepto / Usuario)
+  // =========================
+
+  /**
+   * ICH018
+   * actualizarFiltrosDinamicos()
+   * - Lee listaBase y obtiene:
+   *   * conceptos únicos -> pobla #concepto-filtro
+   *   * usuarios únicos  -> pobla #usuario-filtro
+   * - Mantiene selección anterior si el valor sigue existiendo.
+   * - Se ejecuta cada vez que se traeHistorial() del backend.
+   */
+  actualizarFiltrosDinamicos() {
+    const selConcepto = document.getElementById("concepto-filtro");
+    const selUsuario = document.getElementById("usuario-filtro");
+
+    if (selConcepto) {
+      const prev = selConcepto.value || "todo";
+      const conceptos = Array.from(
+        new Set(this.listaBase.map((x) => String(x.concepto ?? "")).filter((x) => x.trim() !== ""))
+      ).sort((a, b) => a.localeCompare(b, "es"));
+
+      selConcepto.innerHTML =
+        `<option value="todo">Todos</option>` +
+        conceptos.map((c) => `<option value="${this.escapeAttr(c)}">${this.escapeHtml(c)}</option>`).join("");
+
+      selConcepto.value = conceptos.includes(prev) ? prev : "todo";
+    }
+
+    if (selUsuario) {
+      const prev = selUsuario.value || "todo";
+      const usuarios = Array.from(
+        new Set(this.listaBase.map((x) => String(x.usuario ?? "")).filter((x) => x.trim() !== ""))
+      ).sort((a, b) => a.localeCompare(b, "es"));
+
+      selUsuario.innerHTML =
+        `<option value="todo">Todos</option>` +
+        usuarios.map((u) => `<option value="${this.escapeAttr(u)}">${this.escapeHtml(u)}</option>`).join("");
+
+      selUsuario.value = usuarios.includes(prev) ? prev : "todo";
+    }
   }
 
-  /*
-    ICH010
-    asignarEventosBase: asigna listeners globales:
-    - Click en .btn-filter: vuelve a consultar historial con el rango actual
-    - Change en #usuario: llama a seleccionarUsuario() (nota: no está definido aquí)
-  */
+  // =========================
+  // EVENTOS
+  // =========================
+
+  /**
+   * ICH019
+   * asignarEventosBase()
+   * - Click:
+   *   * .btn-filter  => recarga desde backend (solo afecta las fechas)
+   *   * #btn-limpiar => resetea UI + reconsulta backend
+   *   * #btn-export  => exporta CSV (desde vista filtrada si existe)
+   * - Input:
+   *   * q, monto-min, monto-max => aplica filtros UI en tiempo real
+   * - Change:
+   *   * tipo-filtro, concepto-filtro, usuario-filtro, orden => aplica filtros UI en tiempo real
+   *
+   * Nota:
+   * - Las fechas NO están auto-reconsultando por change (lo dejaste como opcional comentado).
+   */
   asignarEventosBase() {
-    // Clicks en toda la página; filtramos por clases
-    document.addEventListener('click', (event) => {
-      const btnHist = event.target.closest('.btn-filter');
-      if (btnHist) {
-        this.traerHistorial(); // Refresca historial con filtros actuales
+    document.addEventListener("click", (event) => {
+      if (event.target.closest(".btn-filter")) {
+        this.traerHistorial();
+        return;
+      }
+
+      if (event.target.closest("#btn-limpiar")) {
+        const setVal = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.value = v;
+        };
+
+        setVal("tipo-filtro", "todo");
+        setVal("concepto-filtro", "todo");
+        setVal("usuario-filtro", "todo");
+        setVal("q", "");
+        setVal("monto-min", "");
+        setVal("monto-max", "");
+        setVal("orden", "fecha_desc");
+
+        this.colocarFechaActual();
+        this.traerHistorial();
+        return;
+      }
+
+      if (event.target.closest("#btn-export")) {
+        this.exportarCSV?.();
         return;
       }
     });
 
-    // Cambios en el combo de usuario
-    document.addEventListener('change', (event) => {
-      if (event.target.id === 'usuario') {
-        this.seleccionarUsuario(); // Nota: este método no está definido en este archivo
-      }
+    // ICH020: Reacción inmediata a campos de texto/número.
+    document.addEventListener("input", (event) => {
+      const ids = ["q", "monto-min", "monto-max"];
+      if (ids.includes(event.target.id)) this.aplicarFiltrosUI();
+    });
+
+    // ICH021: Reacción inmediata a selects.
+    document.addEventListener("change", (event) => {
+      const ids = ["tipo-filtro", "concepto-filtro", "usuario-filtro", "orden"];
+      if (ids.includes(event.target.id)) this.aplicarFiltrosUI();
+
+      // Opción: si quieres reconsultar al cambiar fechas, descomenta:
+      // if (event.target.id === "fecha-inicio" || event.target.id === "fecha-fin") this.traerHistorial();
     });
   }
 
+  // =========================
+  // UTILIDADES
+  // =========================
+
+  /**
+   * ICH022
+   * toNumber(v)
+   * - Convierte a número asegurando:
+   *   * "12,50" => 12.50
+   *   * valores inválidos => 0
+   */
+  toNumber(v) {
+    const n = Number(String(v ?? "0").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  /**
+   * ICH023
+   * esIngreso(v)
+   * - Determina si tipoconconcepto representa Ingreso.
+   * - En tu backend: ingreso suele venir como "1".
+   */
+  esIngreso(v) {
+    return String(v) === "1";
+  }
+
+  /**
+   * ICH024
+   * factorTipo(v)
+   * - Devuelve +1 si es ingreso, -1 si es gasto.
+   * - Nota: algunos backends pueden traer "2" para gasto -> también se trata como gasto (-1).
+   */
+  factorTipo(v) {
+    return this.esIngreso(v) ? 1 : -1;
+  }
+
+  /**
+   * ICH025
+   * convertirTipo(v)
+   * - Convierte tipoconconcepto a texto para la tabla.
+   */
+  convertirTipo(v) {
+    const s = String(v);
+    if (s === "1") return "Ingreso";
+    if (s === "-1" || s === "2") return "Gasto";
+    return "Sin definir";
+  }
+
+  /**
+   * ICH026
+   * formatearFecha(f)
+   * - Convierte:
+   *   * "YYYY-MM-DD"              => "DD/MM/YYYY"
+   *   * "YYYY-MM-DDTHH:mm:ss..."  => "DD/MM/YYYY"
+   * - Si no reconoce el formato, devuelve el string original.
+   */
+  formatearFecha(f) {
+    const s = String(f ?? "");
+    const base = s.split("T")[0];
+    const partes = base.split("-");
+    if (partes.length !== 3) return s;
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  /**
+   * ICH027
+   * escapeHtml(str)
+   * - Sanitiza texto para evitar inyección HTML (XSS) en innerHTML.
+   */
+  escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  /**
+   * ICH028
+   * escapeAttr(str)
+   * - Sanitiza para atributos (value="...") en options.
+   */
+  escapeAttr(str) {
+    return this.escapeHtml(str).replaceAll("`", "&#096;");
+  }
+
+  /**
+   * ICH029
+   * exportarCSV()
+   * - Exporta un CSV usando:
+   *   * listaVista (si hay filtros aplicados)
+   *   * listaBase (si no hay filtros en uso)
+   * - Se descarga como: historial_YYYY-MM-DD.csv
+   */
+  exportarCSV() {
+    const rows = this.listaVista?.length ? this.listaVista : this.listaBase;
+
+    const header = ["ID", "Fecha", "Concepto", "Tipo", "Usuario", "Monto"];
+    const csv = [header.join(",")];
+
+    for (const it of rows) {
+      const line = [
+        this.csvCell(it.id),
+        this.csvCell(this.formatearFecha(it.fecha)),
+        this.csvCell(it.concepto),
+        this.csvCell(this.convertirTipo(it.tipoconconcepto)),
+        this.csvCell(it.usuario),
+        this.csvCell(this.toNumber(it.monto).toFixed(2)),
+      ].join(",");
+      csv.push(line);
+    }
+
+    const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `historial_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /**
+   * ICH030
+   * csvCell(v)
+   * - Escapa comillas y envuelve el valor en comillas dobles para un CSV válido.
+   */
+  csvCell(v) {
+    const s = String(v ?? "");
+    const escaped = s.replaceAll('"', '""');
+    return `"${escaped}"`;
+  }
 }

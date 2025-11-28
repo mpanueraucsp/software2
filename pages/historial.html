@@ -1,206 +1,360 @@
 <!--
   PHI001
-  Interfaz (Pages) - Historial (historial.html).
-  Propósito: mostrar el historial de movimientos en una tabla y permitir filtrar por rango de fechas y tipo.
-  Esta vista normalmente es consumida por InterfazHistorial.js, que:
-  - Inicializa fechas (#fecha-inicio, #fecha-fin)
-  - Llama al backend (api/gbalance/traerHistorial)
-  - Renderiza filas en ".history-table tbody"
-  - Calcula total y lo coloca en #text-total
-  - Actualiza el contador en #title-movimientos
+  Pages - Historial (historial.html)
+
+  Objetivo:
+  - Mostrar en una tabla todos los movimientos (ingresos y gastos) dentro de un rango de fechas.
+  - Permitir que el usuario refine lo mostrado con filtros (tipo, concepto, usuario, búsqueda, montos, orden).
+  - Mostrar un total neto: (Ingresos - Gastos).
+
+  Integración con JS (InterfazHistorial.js):
+  - Lee filtros por ID:
+    #fecha-inicio, #fecha-fin, #tipo-filtro, #concepto-filtro, #usuario-filtro,
+    #q, #monto-min, #monto-max, #orden
+  - Botones:
+    .btn-filter  (reconsulta al backend con el rango de fechas)
+    #btn-limpiar (resetea filtros y re-renderiza)
+    #btn-export  (exporta CSV localmente)
+  - Render dinámico:
+    .history-table tbody (filas)
+    #text-total (total neto)
+    #title-movimientos (contador)
 -->
 
 <style>
-/* PHI002: Contenedor general */
-.historial-container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-}
+  /* PHI002: Contenedor general: centra y limita el ancho de la vista */
+  .historial-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
 
-/* PHI003: Títulos */
-.page-title {
-  font-size: 26px;
-  font-weight: bold;
-  margin-bottom: 25px;
-}
+  /* PHI003: Título principal de la página */
+  .page-title {
+    font-size: 26px;
+    font-weight: 900;
+    margin-bottom: 18px;
+    letter-spacing: .02em;
+  }
 
-.section-title {
-  text-align: center;
-  margin: 40px 0 10px;
-  font-size: 22px;
-  font-weight: bold;
-}
+  /* PHI004: Título secundario (contador de movimientos) */
+  .section-title {
+    text-align: center;
+    margin: 22px 0 12px;
+    font-size: 18px;
+    font-weight: 900;
+  }
 
-/* PHI004: Filtros superiores (fecha inicio/fin + tipo + botón filtrar) */
-.filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 25px;
-  align-items: flex-end;
-  margin-bottom: 20px;
-}
+  /* PHI005: Tarjeta que agrupa todos los filtros */
+  .filters-card{
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+    margin-bottom: 14px;
+  }
 
-.date-filter,
-.select-filter {
-  display: flex;
-  flex-direction: column;
-}
+  /* PHI006: Grid de filtros (12 columnas) */
+  .filters-row {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 12px;
+    align-items: end;
+  }
 
-.date-input-wrapper,
-.select-wrapper {
-  position: relative;
-}
+  /* PHI007: Contenedor de campo (label + control) */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
 
-input[type="date"],
-select {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 2px solid #ccc;
-  font-size: 15px;
-  width: 200px;
-}
+  /* PHI008: Etiqueta de cada filtro */
+  .field label {
+    font-size: 13px;
+    font-weight: 800;
+    color: #374151;
+  }
 
-/* PHI005: Icono X (está definido pero no se usa en el HTML actual) */
-.date-icon {
-  position: absolute;
-  right: 10px;
-  top: 9px;
-  cursor: pointer;
-}
+  /* PHI009: Wrapper para controles (permite adornos/íconos) */
+  .control-wrap {
+    position: relative;
+  }
 
-/* PHI006: Flecha del select (decorativa) */
-.select-arrow {
-  position: absolute;
-  right: 12px;
-  top: 10px;
-  pointer-events: none;
-}
-
-/* PHI007: Botón ATRÁS (clase definida pero el botón no existe en el HTML actual) */
-.btn-back {
-  padding: 8px 20px;
-  border-radius: 8px;
-  border: 1px solid #000;
-  background: #eee;
-  cursor: pointer;
-}
-
-/* PHI008: Tarjeta contenedora de tabla */
-.table-card {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 20px;
-  border: 1px solid #ddd;
-  overflow-x: auto;
-}
-
-/* PHI009: Tabla de historial */
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.history-table thead tr {
-  background: #cfe3ef;
-  font-weight: bold;
-}
-
-.history-table th,
-.history-table td {
-  padding: 10px 12px;
-  font-size: 15px;
-}
-
-.history-table tbody tr:nth-child(even) {
-  background: #f7f7f7;
-}
-
-/* PHI010: Input para montos (TOTAL) */
-.cell-amount {
-  width: 100px;
-  padding: 6px;
-  text-align: center;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-}
-
-.total-label {
-  font-weight: bold;
-  text-align: right;
-  padding-right: 15px;
-}
-
-.total-final {
-  background: #eef5ff;
-  font-weight: bold;
-}
-
-/* PHI011: Responsive */
-@media (max-width: 768px) {
+  /* PHI010: Estilo unificado para inputs y selects */
   input[type="date"],
+  input[type="text"],
+  input[type="number"],
   select {
     width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
   }
 
-  .filters-row {
-    flex-direction: column;
+  /* PHI011: Estado focus para accesibilidad y feedback visual */
+  input[type="date"]:focus,
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  select:focus {
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17,24,39,.10);
   }
-}
+
+  /* PHI012: Flecha decorativa en selects */
+  .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    pointer-events: none;
+    font-size: 12px;
+  }
+
+  /* PHI013: Botón base (estilo compartido) */
+  .btn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    cursor: pointer;
+    font-weight: 900;
+    font-size: 14px;
+    box-shadow: 0 10px 18px rgba(0,0,0,.10);
+    transition: transform .08s ease, box-shadow .18s ease;
+    white-space: nowrap;
+  }
+
+  /* PHI014: Hover del botón */
+  .btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 14px 22px rgba(0,0,0,.14);
+  }
+
+  /* PHI015: Botón principal (acción de consulta/filtrado hacia backend) */
+  .btn-primary{
+    background: linear-gradient(180deg, #111827 0%, #0b1220 100%);
+    color: #fff;
+    border-color: #111827;
+  }
+
+  /* PHI016: Botón secundario (acciones auxiliares) */
+  .btn-ghost{
+    background:#fff;
+  }
+
+  /* PHI017: Utilidades de ancho para el grid (12 columnas) */
+  .col-2 { grid-column: span 2; }
+  .col-3 { grid-column: span 3; }
+  .col-4 { grid-column: span 4; }
+  .col-5 { grid-column: span 5; }
+  .col-6 { grid-column: span 6; }
+  .col-12 { grid-column: span 12; }
+
+  /* PHI018: Tarjeta contenedora de la tabla (con scroll horizontal) */
+  .table-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    overflow-x: auto;
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+  }
+
+  /* PHI019: Tabla de historial */
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 820px;
+  }
+
+  /* PHI020: Encabezado de tabla */
+  .history-table thead tr {
+    background: #cfe3ef;
+    font-weight: 900;
+  }
+
+  /* PHI021: Celdas de tabla */
+  .history-table th,
+  .history-table td {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  /* PHI022: Zebra rows para mejor lectura */
+  .history-table tbody tr:nth-child(even) {
+    background: #f7f7f7;
+  }
+
+  /* PHI023: Input de total neto (solo lectura) */
+  .cell-amount {
+    width: 140px;
+    padding: 8px;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-weight: 900;
+    background: #eef5ff;
+  }
+
+  /* PHI024: Celda etiqueta TOTAL */
+  .total-label {
+    font-weight: 900;
+    text-align: right;
+    padding-right: 15px;
+  }
+
+  /* PHI025: Texto de ayuda bajo filtros */
+  .hint {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  /* PHI026: Responsive: filtros en una columna cuando la pantalla es pequeña */
+  @media (max-width: 980px) {
+    .filters-row { grid-template-columns: 1fr; }
+    .col-2,.col-3,.col-4,.col-5,.col-6,.col-12 { grid-column: auto; }
+    .history-table { min-width: 760px; }
+  }
 </style>
 
-<!-- PHI012: Contenido principal Historial -->
+<!-- PHI027: Contenedor principal de la vista Historial -->
 <div class="historial-container">
-
-  <!-- PHI013: Título principal -->
+  <!-- PHI028: Título principal -->
   <h1 class="page-title">HISTORIAL</h1>
 
-  <!-- PHI014: Barra de filtros (InterfazHistorial.js escucha el click en .btn-filter) -->
-  <div class="filters-row">
+  <!--
+    PHI029: Panel de filtros.
+    Nota: InterfazHistorial.js toma los valores por ID y aplica filtros/orden localmente,
+    además de poder reconsultar al backend cuando se pulsa "Filtrar" (btn-filter).
+  -->
+  <div class="filters-card">
+    <div class="filters-row">
 
-    <!-- PHI015: Filtro por fecha de inicio -->
-    <div class="date-filter">
-      <label>Fecha de inicio</label>
-      <div class="date-input-wrapper">
-        <input type="date" id="fecha-inicio" />
+      <!-- PHI030: Filtro por fecha de inicio (afecta consulta al backend) -->
+      <div class="field col-3">
+        <label for="fecha-inicio">Fecha de inicio</label>
+        <div class="control-wrap">
+          <input type="date" id="fecha-inicio" />
+        </div>
+      </div>
+
+      <!-- PHI031: Filtro por fecha de fin (afecta consulta al backend) -->
+      <div class="field col-3">
+        <label for="fecha-fin">Fecha de fin</label>
+        <div class="control-wrap">
+          <input type="date" id="fecha-fin" />
+        </div>
+      </div>
+
+      <!-- PHI032: Filtro por tipo (aplicación local: todo/ingresos/gastos) -->
+      <div class="field col-2">
+        <label for="tipo-filtro">Tipo</label>
+        <div class="control-wrap">
+          <select id="tipo-filtro">
+            <option value="todo">Todos</option>
+            <option value="ingresos">Ingresos</option>
+            <option value="gastos">Gastos</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <!-- PHI033: Filtro por concepto (JS puede poblarlo con conceptos únicos) -->
+      <div class="field col-2">
+        <label for="concepto-filtro">Concepto</label>
+        <div class="control-wrap">
+          <select id="concepto-filtro">
+            <option value="todo">Todos</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <!-- PHI034: Filtro por usuario (JS puede poblarlo con usuarios únicos) -->
+      <div class="field col-2">
+        <label for="usuario-filtro">Usuario</label>
+        <div class="control-wrap">
+          <select id="usuario-filtro">
+            <option value="todo">Todos</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <!-- PHI035: Búsqueda textual (id/concepto/usuario) -->
+      <div class="field col-4">
+        <label for="q">Búsqueda (id, concepto o usuario)</label>
+        <div class="control-wrap">
+          <input type="text" id="q" placeholder="Ej: Propinas, PAPA, 201..." />
+        </div>
+      </div>
+
+      <!-- PHI036: Filtro por monto mínimo -->
+      <div class="field col-2">
+        <label for="monto-min">Monto mín</label>
+        <div class="control-wrap">
+          <input type="number" id="monto-min" step="0.01" min="0" placeholder="0.00" />
+        </div>
+      </div>
+
+      <!-- PHI037: Filtro por monto máximo -->
+      <div class="field col-2">
+        <label for="monto-max">Monto máx</label>
+        <div class="control-wrap">
+          <input type="number" id="monto-max" step="0.01" min="0" placeholder="9999.00" />
+        </div>
+      </div>
+
+      <!-- PHI038: Ordenamiento local de resultados -->
+      <div class="field col-2">
+        <label for="orden">Ordenar</label>
+        <div class="control-wrap">
+          <select id="orden">
+            <option value="fecha_desc">Fecha (reciente)</option>
+            <option value="fecha_asc">Fecha (antigua)</option>
+            <option value="monto_desc">Monto (mayor)</option>
+            <option value="monto_asc">Monto (menor)</option>
+          </select>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <!-- PHI039: Acciones del panel -->
+      <div class="field col-12" style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+        <!-- PHI040: Botón Filtrar (reconsulta al backend con fechas actuales) -->
+        <button class="btn btn-primary btn-filter" type="button">Filtrar</button>
+
+        <!-- PHI041: Botón Limpiar (reset de filtros; controlado por JS) -->
+        <button class="btn btn-ghost" id="btn-limpiar" type="button">Limpiar</button>
+
+        <!-- PHI042: Botón Exportar (genera CSV local; controlado por JS) -->
+        <button class="btn btn-ghost" id="btn-export" type="button">Exportar CSV</button>
       </div>
     </div>
 
-    <!-- PHI016: Filtro por fecha de fin -->
-    <div class="date-filter">
-      <label>Fecha de fin</label>
-      <div class="date-input-wrapper">
-        <input type="date" id="fecha-fin" />
-      </div>
+    <!-- PHI043: Texto de ayuda para el uso de filtros -->
+    <div class="hint">
+      Tip: escribe en búsqueda para encontrar rápido un concepto/usuario. Los filtros se aplican sin volver a cargar toda la página.
     </div>
-
-    <!-- PHI017: Filtro por tipo (nota: el JS actual NO lo usa aún) -->
-    <div class="select-filter">
-      <label>Filtrar:</label>
-      <div class="select-wrapper">
-        <select id="tipo-filtro">
-          <option value="todo">Todos</option>
-          <option value="ingresos">Ingresos</option>
-          <option value="gastos">Gastos</option>
-        </select>
-        <span class="select-arrow">▼</span>
-      </div>
-    </div>
-
-    <!-- PHI018: Botón Filtrar -> dispara traerHistorial() en InterfazHistorial.js -->
-    <button class="btn-filter">Filtrar</button>
   </div>
 
-  <!-- PHI019: Título dinámico de movimientos (JS actualiza cantidad) -->
+  <!-- PHI044: Título dinámico (JS actualiza el contador de movimientos) -->
   <h2 class="section-title" id="title-movimientos">MOVIMIENTOS</h2>
 
-  <!-- PHI020: Tabla -->
+  <!-- PHI045: Tarjeta contenedora de resultados (tabla) -->
   <div class="table-card">
     <table class="history-table">
 
-      <!-- PHI021: Encabezado -->
+      <!-- PHI046: Encabezados de la tabla -->
       <thead>
         <tr>
           <th>ID</th>
@@ -212,33 +366,19 @@ select {
         </tr>
       </thead>
 
-      <!--
-        PHI022: Cuerpo de la tabla
-        InterfazHistorial.js reemplaza este tbody con resultados reales (tr dinámicos).
-        La fila de ejemplo es solo maqueta.
-      -->
-      <tbody>
-        <tr>
-          <td>p-0012</td>
-          <td>23/08/2025</td>
-          <td>Sueldo</td>
-          <td>Mensual</td>
-          <td>Padre</td>
-          <td>2000.00</td>
-        </tr>
-      </tbody>
+      <!-- PHI047: Cuerpo de tabla (InterfazHistorial.js inserta filas aquí) -->
+      <tbody></tbody>
 
-      <!-- PHI023: Footer con TOTAL calculado por JS en #text-total -->
+      <!-- PHI048: Pie de tabla (muestra el total neto calculado por el JS) -->
       <tfoot>
         <tr>
-          <td colspan="5" class="total-label">TOTAL</td>
+          <td colspan="5" class="total-label">TOTAL (Ingresos - Gastos)</td>
           <td>
-            <input class="cell-amount total-final" id="text-total" value="6250" readonly/>
+            <input class="cell-amount" id="text-total" value="0.00" readonly />
           </td>
         </tr>
       </tfoot>
 
     </table>
   </div>
-
 </div>
