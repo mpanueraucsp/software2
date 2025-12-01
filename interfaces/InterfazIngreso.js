@@ -31,6 +31,7 @@ class InterfazIngreso {
   constructor() {
     this.colocarFechaActual();
     this.asignarEventos();
+    
   }
 
   /**
@@ -50,6 +51,7 @@ class InterfazIngreso {
 
     this.traerConceptos();
     this.traerBalance();
+    //this.clickEditarRegistro();
   }
 
   /**
@@ -108,6 +110,7 @@ class InterfazIngreso {
         this.gastos.push(item);
       }
     }
+    //this.clickEditarRegistro();
 
     console.debug("ingresos:", this.ingresos);
     console.debug("gastos:", this.gastos);
@@ -115,6 +118,7 @@ class InterfazIngreso {
     this.renderIngresos();
     this.renderGastos();
     this.calcularTotales();
+    
   }
 
   /**
